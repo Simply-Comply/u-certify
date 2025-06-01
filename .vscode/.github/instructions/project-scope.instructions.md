@@ -1,3 +1,7 @@
+---
+applyTo: "**"
+---
+
 # UCertify - Project Context
 
 ## Project Overview
