@@ -1,2 +1,11 @@
 <Solution>
+  <Folder Name="/src/">
+    <Project Path="src\UCertify.Domain\UCertify.Domain.csproj" />
+    <Project Path="src\UCertify.Application\UCertify.Application.csproj" />
+    <Project Path="src\UCertify.Infrastructure\UCertify.Infrastructure.csproj" />
+    <Project Path="src\UCertify.Api\UCertify.Api.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="src\UCertify.Tests\UCertify.Tests.csproj" />
+  </Folder>
 </Solution>
