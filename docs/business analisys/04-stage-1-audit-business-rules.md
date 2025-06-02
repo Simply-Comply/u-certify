@@ -1,9 +1,11 @@
 # Business Rules - Stage 1 Audit
 
 ## Overview
+
 The Stage 1 Audit is a preliminary assessment to determine client readiness for Stage 2 certification audit. It focuses on understanding the management system, evaluating documentation, confirming scope, and identifying potential nonconformities that could be classified as major during Stage 2.
 
 ## Domain Context
+
 - **Stage Type**: Readiness Assessment
 - **Actors**: Lead Auditor, Audit Team Members, Client Management Representative, System
 - **ISO 17021 Reference**: Clause 9.3.1.2 - Stage 1 audit
@@ -11,7 +13,9 @@ The Stage 1 Audit is a preliminary assessment to determine client readiness for 
 ## Business Rules
 
 ### BR-S1-001: Stage 1 Audit Prerequisites
+
 **Rule**: Stage 1 audit SHALL NOT commence without prerequisites met
+
 - **Required Prerequisites**:
   - Fully executed contract
   - Audit team assigned and accepted by client
@@ -22,7 +26,9 @@ The Stage 1 Audit is a preliminary assessment to determine client readiness for 
 - **Rationale**: Ensures proper preparation and authorization
 
 ### BR-S1-002: Audit Team Assignment
+
 **Rule**: Audit team MUST meet competence requirements
+
 - **Team Composition**:
   - Lead Auditor (mandatory)
   - Technical Expert (if scope requires)
@@ -36,7 +42,9 @@ The Stage 1 Audit is a preliminary assessment to determine client readiness for 
 - **Rationale**: ISO 17021 Clause 9.2.2 team competence
 
 ### BR-S1-003: Audit Plan Requirements
+
 **Rule**: Stage 1 audit plan MUST cover mandatory elements
+
 - **Mandatory Elements**:
   - Audit objectives (readiness determination)
   - Audit criteria (standard requirements)
@@ -50,7 +58,9 @@ The Stage 1 Audit is a preliminary assessment to determine client readiness for 
 - **Rationale**: ISO 17021 Clause 9.2.3.1 planning requirements
 
 ### BR-S1-004: Stage 1 Audit Objectives
+
 **Rule**: Stage 1 audit MUST achieve defined objectives
+
 - **Primary Objectives**:
   - Review management system documentation
   - Evaluate location conditions and site-specific issues
@@ -62,7 +72,9 @@ The Stage 1 Audit is a preliminary assessment to determine client readiness for 
 - **Rationale**: ISO 17021 Clause 9.3.1.2.1 requirements
 
 ### BR-S1-005: Documentation Review Scope
+
 **Rule**: Stage 1 MUST review key system documentation
+
 - **Mandatory Documents**:
   - Management system manual (or equivalent)
   - Policy statements
@@ -76,7 +88,9 @@ The Stage 1 Audit is a preliminary assessment to determine client readiness for 
 - **Rationale**: Determines system establishment
 
 ### BR-S1-006: On-Site Activities Requirement
+
 **Rule**: Stage 1 SHOULD be conducted at client premises
+
 - **On-Site Purposes**:
   - Understand physical layout
   - Assess site-specific conditions
@@ -88,7 +102,9 @@ The Stage 1 Audit is a preliminary assessment to determine client readiness for 
 - **Rationale**: ISO 17021 Clause 9.3.1.2.2 preference
 
 ### BR-S1-007: Stage 1 Duration Limits
+
 **Rule**: Stage 1 duration SHALL be proportionate
+
 - **Duration Guidelines**:
   - Typically 20-30% of total Stage 1+2 time
   - Minimum: 0.5 person-day
@@ -98,7 +114,9 @@ The Stage 1 Audit is a preliminary assessment to determine client readiness for 
 - **Rationale**: Balanced effort distribution
 
 ### BR-S1-008: Readiness Determination
+
 **Rule**: Stage 1 MUST conclude with readiness decision
+
 - **Decision Options**:
   - **Ready**: Proceed to Stage 2 as planned
   - **Conditionally Ready**: Minor issues to resolve
@@ -108,7 +126,9 @@ The Stage 1 Audit is a preliminary assessment to determine client readiness for 
 - **Rationale**: Prevents unsuccessful Stage 2 audits
 
 ### BR-S1-009: Finding Classification
+
 **Rule**: Stage 1 findings SHALL be classified appropriately
+
 - **Classifications**:
   - **Major Concern**: Would be major NC in Stage 2
   - **Minor Concern**: Would be minor NC in Stage 2
@@ -119,7 +139,9 @@ The Stage 1 Audit is a preliminary assessment to determine client readiness for 
 - **Rationale**: Stage 1 is readiness, not conformity assessment
 
 ### BR-S1-010: Stage 2 Planning Confirmation
+
 **Rule**: Stage 1 MUST confirm or revise Stage 2 plan
+
 - **Planning Elements**:
   - Audit duration adequacy
   - Team composition appropriateness
@@ -131,7 +153,9 @@ The Stage 1 Audit is a preliminary assessment to determine client readiness for 
 - **Rationale**: Ensures Stage 2 effectiveness
 
 ### BR-S1-011: Stage 1 Report Requirements
+
 **Rule**: Stage 1 report MUST be comprehensive
+
 - **Report Sections**:
   - Executive summary with readiness conclusion
   - Objectives achievement assessment
@@ -145,7 +169,9 @@ The Stage 1 Audit is a preliminary assessment to determine client readiness for 
 - **Rationale**: Clear communication and records
 
 ### BR-S1-012: Client Response Time
+
 **Rule**: Client SHALL have defined time to address concerns
+
 - **Response Requirements**:
   - Major concerns: Must address before Stage 2
   - Minor concerns: Plan required, implementation by Stage 2
@@ -155,7 +181,9 @@ The Stage 1 Audit is a preliminary assessment to determine client readiness for 
 - **Rationale**: Maintains momentum while allowing preparation
 
 ### BR-S1-013: Internal Audit Verification
+
 **Rule**: Stage 1 MUST verify internal audit completion
+
 - **Verification Requirements**:
   - Full cycle completed (all processes/areas)
   - Competent internal auditors used
@@ -166,7 +194,9 @@ The Stage 1 Audit is a preliminary assessment to determine client readiness for 
 - **Rationale**: ISO standard requirement for certification
 
 ### BR-S1-014: Management Review Verification
+
 **Rule**: Stage 1 MUST verify management review conducted
+
 - **Verification Requirements**:
   - Covers all required inputs
   - Top management participation
@@ -177,7 +207,9 @@ The Stage 1 Audit is a preliminary assessment to determine client readiness for 
 - **Rationale**: Demonstrates management commitment
 
 ### BR-S1-015: Confidentiality During Stage 1
+
 **Rule**: All Stage 1 information SHALL remain confidential
+
 - **Confidentiality Scope**:
   - Client documentation reviewed
   - Processes observed
@@ -190,6 +222,7 @@ The Stage 1 Audit is a preliminary assessment to determine client readiness for 
 ## State Transitions
 
 ### Valid State Transitions
+
 - **Planned** → **In Progress** (audit commenced)
 - **In Progress** → **Completed** (audit finished)
 - **Completed** → **Report Issued** (within 10 days)
@@ -198,6 +231,7 @@ The Stage 1 Audit is a preliminary assessment to determine client readiness for 
 - **Any State** → **Cancelled** (contract terminated)
 
 ### State Invariants
+
 - "In Progress" audits MUST have team on-site/connected
 - "Completed" audits MUST have readiness decision
 - "Report Issued" MUST have client acknowledgment tracking
@@ -205,11 +239,13 @@ The Stage 1 Audit is a preliminary assessment to determine client readiness for 
 ## Integration Points
 
 ### Upstream
+
 - Contract management (terms and scope)
 - Audit team competence database
 - Audit planning system
 
 ### Downstream
+
 - Stage 2 audit planning
 - Finding tracking system
 - Client communication portal
@@ -218,6 +254,7 @@ The Stage 1 Audit is a preliminary assessment to determine client readiness for 
 ## Performance Indicators
 
 ### Tracked Metrics
+
 - Stage 1 to Stage 2 conversion rate
 - Average days between Stage 1 and Stage 2
 - Percentage requiring Stage 2 delay
@@ -225,6 +262,7 @@ The Stage 1 Audit is a preliminary assessment to determine client readiness for 
 - Client satisfaction scores
 
 ### Quality Metrics
+
 - Report issuance within SLA: Target 95%
 - Stage 2 success rate after Stage 1: Target 90%
 - Client readiness accuracy: Target 85%
@@ -232,6 +270,7 @@ The Stage 1 Audit is a preliminary assessment to determine client readiness for 
 ## Audit Trail Requirements
 
 ### Tracked Events
+
 - Audit plan issued
 - Audit started/ended
 - Documents reviewed
@@ -241,6 +280,7 @@ The Stage 1 Audit is a preliminary assessment to determine client readiness for 
 - Client acknowledgment
 
 ### Evidence Collection
+
 - Documentation review checklist
 - Interview notes (summary level)
 - Site tour observations
@@ -249,16 +289,19 @@ The Stage 1 Audit is a preliminary assessment to determine client readiness for 
 ## Error Handling
 
 ### BR-S1-ERR-001: Documentation Unavailable
+
 - **Condition**: Key documents not provided
 - **Response**: Document in report, assess impact
 - **Decision**: May determine "Not Ready"
 
 ### BR-S1-ERR-002: Client Unpreparedness
+
 - **Condition**: Significant readiness gaps found
 - **Response**: Stop audit if productive work impossible
 - **Billing**: Per contract cancellation terms
 
 ### BR-S1-ERR-003: Team Member Unavailable
+
 - **Condition**: Assigned auditor cannot attend
 - **Response**: Replace with qualified alternate
 - **Approval**: Client notification and acceptance

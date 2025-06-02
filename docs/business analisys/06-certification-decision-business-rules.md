@@ -1,9 +1,11 @@
 # Business Rules - Certification Decision Stage
 
 ## Overview
+
 The Certification Decision stage is the formal process where an independent decision-maker reviews all audit evidence and makes the final determination on whether to grant, refuse, maintain, renew, suspend, restore, or withdraw certification. This ensures impartial decision-making separate from the audit process.
 
 ## Domain Context
+
 - **Stage Type**: Independent Review and Decision
 - **Actors**: Certification Decision Maker, Quality Manager, System
 - **ISO 17021 Reference**: Clause 9.5 - Certification decision
@@ -11,7 +13,9 @@ The Certification Decision stage is the formal process where an independent deci
 ## Business Rules
 
 ### BR-CD-001: Decision Maker Independence
+
 **Rule**: Certification decision maker MUST be independent
+
 - **Independence Requirements**:
   - Not involved in the audit (Stage 1 or Stage 2)
   - Not involved in application review
@@ -22,7 +26,9 @@ The Certification Decision stage is the formal process where an independent deci
 - **Rationale**: ISO 17021 Clause 9.5.1 impartiality requirement
 
 ### BR-CD-002: Decision Maker Competence
+
 **Rule**: Decision maker MUST meet competence criteria
+
 - **Competence Requirements**:
   - Understanding of applicable standard(s)
   - Knowledge of certification process
@@ -34,7 +40,9 @@ The Certification Decision stage is the formal process where an independent deci
 - **Rationale**: Quality and consistency of decisions
 
 ### BR-CD-003: Information Requirements for Decision
+
 **Rule**: Decision SHALL be based on complete information
+
 - **Mandatory Information**:
   - Application and review records
   - Stage 1 audit report
@@ -48,7 +56,9 @@ The Certification Decision stage is the formal process where an independent deci
 - **Rationale**: ISO 17021 Clause 9.5.1 sufficient information
 
 ### BR-CD-004: Decision Timeline
+
 **Rule**: Certification decision MUST be timely
+
 - **Timeline Requirements**:
   - Within 30 days of receiving complete information
   - Expedited for transfers (15 days)
@@ -59,7 +69,9 @@ The Certification Decision stage is the formal process where an independent deci
 - **Rationale**: Client service and business needs
 
 ### BR-CD-005: Decision Options
+
 **Rule**: Decision maker SHALL select from defined options
+
 - **For Initial Certification**:
   - **Grant Certification**: All requirements met
   - **Refuse Certification**: Major NC(s) not resolved
@@ -70,7 +82,9 @@ The Certification Decision stage is the formal process where an independent deci
 - **Rationale**: Clear and consistent outcomes
 
 ### BR-CD-006: Conditions for Granting Certification
+
 **Rule**: Certification SHALL only be granted when conditions met
+
 - **Required Conditions**:
   - No unresolved major nonconformities
   - Minor nonconformities have correction evidence
@@ -82,7 +96,9 @@ The Certification Decision stage is the formal process where an independent deci
 - **Rationale**: Ensures system conformity
 
 ### BR-CD-007: Nonconformity Closure Verification
+
 **Rule**: Decision maker MUST verify NC closure adequacy
+
 - **Major NC Requirements**:
   - Root cause analysis reviewed
   - Correction implemented
@@ -96,7 +112,9 @@ The Certification Decision stage is the formal process where an independent deci
 - **Rationale**: Ensures effective resolution
 
 ### BR-CD-008: Follow-up Audit Triggers
+
 **Rule**: Follow-up audit SHALL be required for specific conditions
+
 - **Mandatory Triggers**:
   - Major nonconformity requiring on-site verification
   - Multiple majors indicating systemic issues
@@ -107,7 +125,9 @@ The Certification Decision stage is the formal process where an independent deci
 - **Rationale**: Verification of corrective actions
 
 ### BR-CD-009: Certification Refusal Process
+
 **Rule**: Refusal decisions MUST follow defined process
+
 - **Refusal Requirements**:
   - Clear statement of reasons
   - Reference to specific requirements not met
@@ -119,7 +139,9 @@ The Certification Decision stage is the formal process where an independent deci
 - **Rationale**: Transparency and improvement opportunity
 
 ### BR-CD-010: Multi-Site Certification Decisions
+
 **Rule**: Multi-site decisions SHALL consider all sites
+
 - **Decision Criteria**:
   - Central office must conform
   - Sample sites must conform
@@ -130,7 +152,9 @@ The Certification Decision stage is the formal process where an independent deci
 - **Rationale**: System integrity across locations
 
 ### BR-CD-011: Conditional Certification
+
 **Rule**: Conditional certification is NOT permitted
+
 - **Principle**: Certificate issued only when fully conforming
 - **Alternative**: Short-term surveillance may be added
 - **Communication**: Clear to client - certified or not
@@ -138,7 +162,9 @@ The Certification Decision stage is the formal process where an independent deci
 - **Rationale**: ISO 17021 prohibition on conditional certificates
 
 ### BR-CD-012: Decision Documentation
+
 **Rule**: All decisions MUST be comprehensively documented
+
 - **Documentation Requirements**:
   - Decision form completed
   - Rationale statement
@@ -151,7 +177,9 @@ The Certification Decision stage is the formal process where an independent deci
 - **Rationale**: Accountability and traceability
 
 ### BR-CD-013: Certificate Validity Period
+
 **Rule**: Certificates SHALL have standard validity
+
 - **Initial Certification**:
   - 3-year validity from decision date
   - Subject to surveillance audits
@@ -162,7 +190,9 @@ The Certification Decision stage is the formal process where an independent deci
 - **Rationale**: ISO 17021 certification cycle requirements
 
 ### BR-CD-014: Decision Review Rights
+
 **Rule**: Clients SHALL have review rights for adverse decisions
+
 - **Review Options**:
   - Request reconsideration with new evidence
   - Appeal to different decision maker
@@ -173,7 +203,9 @@ The Certification Decision stage is the formal process where an independent deci
 - **Rationale**: Fair process and client rights
 
 ### BR-CD-015: Surveillance Program Definition
+
 **Rule**: Certification decision MUST define surveillance program
+
 - **Program Elements**:
   - First surveillance: Within 12 months
   - Second surveillance: Within 24 months
@@ -184,7 +216,9 @@ The Certification Decision stage is the formal process where an independent deci
 - **Rationale**: Ongoing conformity verification
 
 ### BR-CD-016: Decision Communication
+
 **Rule**: Decision SHALL be communicated formally
+
 - **Communication Requirements**:
   - Written notification within 5 days
   - Clear statement of decision
@@ -197,7 +231,9 @@ The Certification Decision stage is the formal process where an independent deci
 - **Rationale**: Clear expectations and records
 
 ### BR-CD-017: Positive Decision Actions
+
 **Rule**: Approved certifications SHALL trigger defined actions
+
 - **Automatic Actions**:
   - Certificate generation request
   - Client portal status update
@@ -209,7 +245,9 @@ The Certification Decision stage is the formal process where an independent deci
 - **Rationale**: Consistent client experience
 
 ### BR-CD-018: Decision Integrity Controls
+
 **Rule**: System SHALL prevent decision tampering
+
 - **Control Measures**:
   - Decision locked after entry
   - Changes require new decision
@@ -223,6 +261,7 @@ The Certification Decision stage is the formal process where an independent deci
 ## State Transitions
 
 ### Valid State Transitions
+
 - **Awaiting Decision** → **Under Review** (assigned to decision maker)
 - **Under Review** → **Additional Info Required** (clarification needed)
 - **Under Review** → **Certification Granted** (requirements met)
@@ -232,6 +271,7 @@ The Certification Decision stage is the formal process where an independent deci
 - **Follow-up Required** → **Under Review** (after follow-up audit)
 
 ### State Invariants
+
 - "Under Review" MUST have assigned decision maker
 - "Certification Granted" MUST have validity dates
 - "Certification Refused" MUST have documented reasons
@@ -240,12 +280,14 @@ The Certification Decision stage is the formal process where an independent deci
 ## Integration Points
 
 ### Upstream
+
 - Audit management system
 - Nonconformity tracking
 - Document management
 - Payment verification
 
 ### Downstream
+
 - Certificate generation
 - Surveillance planning
 - Public registry
@@ -267,6 +309,7 @@ The Certification Decision stage is the formal process where an independent deci
 ## Performance Metrics
 
 ### Tracked KPIs
+
 - Decision timeline compliance
 - First-time approval rate
 - Appeals/reversals rate
@@ -274,6 +317,7 @@ The Certification Decision stage is the formal process where an independent deci
 - Customer satisfaction
 
 ### Quality Indicators
+
 - Accreditation body findings on decisions
 - Decision maker calibration results
 - Appeals upheld vs. overturned
@@ -281,6 +325,7 @@ The Certification Decision stage is the formal process where an independent deci
 ## Audit Trail Requirements
 
 ### Tracked Events
+
 - Assignment to decision maker
 - Information review started/completed
 - Consultations (if any)
@@ -289,6 +334,7 @@ The Certification Decision stage is the formal process where an independent deci
 - Appeals received
 
 ### Retention
+
 - Decision records: Permanent
 - Supporting documents: 3 certification cycles
 - Communication logs: 5 years
@@ -296,18 +342,21 @@ The Certification Decision stage is the formal process where an independent deci
 ## Error Handling
 
 ### BR-CD-ERR-001: Incomplete Information
+
 - **Condition**: Missing required documents
 - **Response**: Request from source
 - **Timeline**: 10 days to provide
 - **Escalation**: To Quality Manager
 
 ### BR-CD-ERR-002: Conflict Discovered
+
 - **Condition**: Decision maker conflict identified
 - **Response**: Immediate reassignment
 - **Documentation**: Reason for reassignment
 - **Prevention**: Enhanced screening
 
 ### BR-CD-ERR-003: System Decision Mismatch
+
 - **Condition**: Manual override of system recommendation
 - **Response**: Additional justification required
 - **Review**: Quality Manager approval

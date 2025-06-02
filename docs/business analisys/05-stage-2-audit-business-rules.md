@@ -1,9 +1,11 @@
 # Business Rules - Stage 2 Audit
 
 ## Overview
+
 The Stage 2 Audit is the main certification assessment where the implementation and effectiveness of the client's management system is evaluated against all requirements of the applicable standard(s). This stage determines whether certification can be recommended.
 
 ## Domain Context
+
 - **Stage Type**: Conformity Assessment
 - **Actors**: Lead Auditor, Audit Team Members, Technical Expert, Client Personnel, System
 - **ISO 17021 Reference**: Clause 9.3.1.3 - Stage 2 audit
@@ -11,7 +13,9 @@ The Stage 2 Audit is the main certification assessment where the implementation 
 ## Business Rules
 
 ### BR-S2-001: Stage 2 Prerequisites
+
 **Rule**: Stage 2 SHALL NOT commence without prerequisites verified
+
 - **Required Prerequisites**:
   - Stage 1 completed with "Ready" or "Conditionally Ready" status
   - Stage 1 concerns addressed (if any)
@@ -24,7 +28,9 @@ The Stage 2 Audit is the main certification assessment where the implementation 
 - **Rationale**: Ensures readiness and validity
 
 ### BR-S2-002: Audit Plan Comprehensiveness
+
 **Rule**: Stage 2 audit plan MUST cover all requirements
+
 - **Plan Elements**:
   - All applicable standard clauses
   - All processes within scope
@@ -38,7 +44,9 @@ The Stage 2 Audit is the main certification assessment where the implementation 
 - **Rationale**: ISO 17021 Clause 9.2.3.1 comprehensive planning
 
 ### BR-S2-003: Opening Meeting Requirements
+
 **Rule**: Stage 2 MUST commence with formal opening meeting
+
 - **Mandatory Agenda Items**:
   - Confirm audit scope and objectives
   - Confirm audit plan and schedule
@@ -54,7 +62,9 @@ The Stage 2 Audit is the main certification assessment where the implementation 
 - **Rationale**: Sets expectations and ensures understanding
 
 ### BR-S2-004: Audit Evidence Requirements
+
 **Rule**: Audit conclusions MUST be based on objective evidence
+
 - **Evidence Types**:
   - Documents and records
   - Interviews with personnel
@@ -69,7 +79,9 @@ The Stage 2 Audit is the main certification assessment where the implementation 
 - **Rationale**: ISO 17021 objectivity and evidence-based approach
 
 ### BR-S2-005: Sampling Methodology
+
 **Rule**: Audit sampling SHALL be representative and justified
+
 - **Sampling Approach**:
   - Risk-based selection priority
   - Statistical validity where applicable
@@ -83,7 +95,9 @@ The Stage 2 Audit is the main certification assessment where the implementation 
 - **Rationale**: Confidence in audit conclusions
 
 ### BR-S2-006: Personnel Interview Requirements
+
 **Rule**: Audits MUST include appropriate personnel interviews
+
 - **Interview Coverage**:
   - Top management (mandatory)
   - Process owners (all key processes)
@@ -98,7 +112,9 @@ The Stage 2 Audit is the main certification assessment where the implementation 
 - **Rationale**: Verify implementation and awareness
 
 ### BR-S2-007: Nonconformity Classification
+
 **Rule**: Nonconformities MUST be classified consistently
+
 - **Major Nonconformity**:
   - Total absence of required process
   - Systematic failure of implemented process
@@ -113,7 +129,9 @@ The Stage 2 Audit is the main certification assessment where the implementation 
 - **Rationale**: ISO 17021 consistent evaluation
 
 ### BR-S2-008: Nonconformity Documentation
+
 **Rule**: Each nonconformity MUST be fully documented
+
 - **Required Elements**:
   - Standard clause reference
   - Statement of requirement
@@ -126,7 +144,9 @@ The Stage 2 Audit is the main certification assessment where the implementation 
 - **Rationale**: Enables effective corrective action
 
 ### BR-S2-009: Positive Findings Recognition
+
 **Rule**: Audits SHOULD identify positive practices
+
 - **Documentation Options**:
   - Opportunities for Improvement (OFI)
   - Positive observations
@@ -137,7 +157,9 @@ The Stage 2 Audit is the main certification assessment where the implementation 
 - **Rationale**: Balanced reporting and encouragement
 
 ### BR-S2-010: Audit Duration Compliance
+
 **Rule**: Stage 2 duration MUST meet minimum requirements
+
 - **Duration Verification**:
   - Meets ISO 17021 Annex B minimums
   - Justified if reduced (documented rationale)
@@ -148,7 +170,9 @@ The Stage 2 Audit is the main certification assessment where the implementation 
 - **Rationale**: Adequate time for thorough assessment
 
 ### BR-S2-011: Audit Team Meetings
+
 **Rule**: Audit team SHALL meet daily during multi-day audits
+
 - **Meeting Purposes**:
   - Review day's findings
   - Classify potential nonconformities
@@ -160,7 +184,9 @@ The Stage 2 Audit is the main certification assessment where the implementation 
 - **Rationale**: Consistency and completeness
 
 ### BR-S2-012: Closing Meeting Requirements
+
 **Rule**: Stage 2 MUST conclude with formal closing meeting
+
 - **Mandatory Elements**:
   - Thank client for cooperation
   - Confirm audit scope covered
@@ -175,7 +201,9 @@ The Stage 2 Audit is the main certification assessment where the implementation 
 - **Rationale**: Clear communication of results
 
 ### BR-S2-013: Certification Recommendation
+
 **Rule**: Lead Auditor MUST make clear recommendation
+
 - **Recommendation Options**:
   - **Recommend Certification**: No majors, minors acceptable
   - **Conditional Recommendation**: Minors require correction evidence
@@ -186,7 +214,9 @@ The Stage 2 Audit is the main certification assessment where the implementation 
 - **Rationale**: Clear outcome from audit
 
 ### BR-S2-014: Corrective Action Timelines
+
 **Rule**: Nonconformities SHALL have defined correction timelines
+
 - **Major Nonconformities**:
   - Root cause analysis: 30 days
   - Correction and corrective action: 90 days maximum
@@ -198,7 +228,9 @@ The Stage 2 Audit is the main certification assessment where the implementation 
 - **Rationale**: Timely system improvement
 
 ### BR-S2-015: Audit Report Completeness
+
 **Rule**: Stage 2 report MUST be comprehensive
+
 - **Report Sections**:
   - Executive summary
   - Audit details (dates, team, scope)
@@ -213,7 +245,9 @@ The Stage 2 Audit is the main certification assessment where the implementation 
 - **Rationale**: Complete record for decision-making
 
 ### BR-S2-016: Multi-Site Sampling Records
+
 **Rule**: Multi-site audits MUST document sampling rationale
+
 - **Documentation Requirements**:
   - Total number of sites
   - Risk assessment of sites
@@ -225,7 +259,9 @@ The Stage 2 Audit is the main certification assessment where the implementation 
 - **Rationale**: IAF MD 1 multi-site requirements
 
 ### BR-S2-017: Technical Expert Utilization
+
 **Rule**: Technical experts SHALL be used appropriately
+
 - **Utilization Rules**:
   - Cannot audit alone (accompanied by auditor)
   - Provides technical input only
@@ -236,7 +272,9 @@ The Stage 2 Audit is the main certification assessment where the implementation 
 - **Rationale**: Technical competence without auditor conflict
 
 ### BR-S2-018: Witnessed Activity Requirements
+
 **Rule**: Key processes SHOULD be witnessed in operation
+
 - **Priority Processes**:
   - Core business processes
   - High-risk activities
@@ -249,6 +287,7 @@ The Stage 2 Audit is the main certification assessment where the implementation 
 ## State Transitions
 
 ### Valid State Transitions
+
 - **Planned** → **In Progress** (audit commenced)
 - **In Progress** → **Completed** (audit finished)
 - **Completed** → **Report Drafted** (findings documented)
@@ -258,6 +297,7 @@ The Stage 2 Audit is the main certification assessment where the implementation 
 - **Report Issued** → **Certification Recommended** (no majors)
 
 ### State Invariants
+
 - "In Progress" MUST have team on-site
 - "Completed" MUST have all findings classified
 - "Report Issued" MUST have recommendation decision
@@ -265,11 +305,13 @@ The Stage 2 Audit is the main certification assessment where the implementation 
 ## Integration Points
 
 ### Upstream
+
 - Stage 1 audit results
 - Audit planning system
 - Auditor scheduling system
 
 ### Downstream
+
 - Nonconformity tracking system
 - Certification decision process
 - Follow-up audit planning
@@ -278,6 +320,7 @@ The Stage 2 Audit is the main certification assessment where the implementation 
 ## Performance Indicators
 
 ### Tracked Metrics
+
 - Average nonconformities per audit
 - Major vs. minor NC ratio
 - Certification recommendation rate
@@ -285,6 +328,7 @@ The Stage 2 Audit is the main certification assessment where the implementation 
 - Corrective action closure rate
 
 ### Quality Indicators
+
 - Client complaint rate
 - Accreditation body findings
 - Witness audit results
@@ -293,6 +337,7 @@ The Stage 2 Audit is the main certification assessment where the implementation 
 ## Audit Trail Requirements
 
 ### Tracked Events
+
 - Audit timeline (start, breaks, end)
 - Processes audited
 - Personnel interviewed
@@ -302,6 +347,7 @@ The Stage 2 Audit is the main certification assessment where the implementation 
 - Report versions
 
 ### Evidence Retention
+
 - Audit notes: 3 years minimum
 - Evidence copies: As needed for NCs
 - Photos: Where permitted and relevant
@@ -309,21 +355,25 @@ The Stage 2 Audit is the main certification assessment where the implementation 
 ## Error Handling
 
 ### BR-S2-ERR-001: Scope Creep Detection
+
 - **Condition**: Client requests scope expansion during audit
 - **Response**: Document but do not audit
 - **Action**: Requires contract amendment
 
 ### BR-S2-ERR-002: Safety Incident
+
 - **Condition**: Safety issue during audit
 - **Response**: Stop audit, ensure safety
 - **Documentation**: Incident report required
 
 ### BR-S2-ERR-003: Client Obstruction
+
 - **Condition**: Access denied or information withheld
 - **Response**: Document as potential major NC
 - **Escalation**: Lead auditor to management
 
 ### BR-S2-ERR-004: Evidence Tampering
+
 - **Condition**: Suspected falsification
 - **Response**: Document concerns, investigate
 - **Action**: May terminate audit
