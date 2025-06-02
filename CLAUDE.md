@@ -1,16 +1,19 @@
 # UCertify - Project Context
 
 ## Project Overview
+
 UCertify is a cloud-based compliance management system for Conformity Assessment Bodies (CABs) - organizations that certify other companies against standards like ISO 9001, ISO 14001, etc. Think of it as "Salesforce for certification bodies."
 
 ## Business Context
+
 - **Problem**: 70% of CABs use paper/Excel, causing compliance issues and inefficiency
 - **Solution**: Digital platform automating certification workflows while ensuring accreditation compliance
 - **MVP Focus**: ISO/IEC 17021-1:2015 standard (management system certification)
 - **Users**: Auditors, quality managers, CAB administrators
 
 ## Technical Stack
-```
+
+```markdown
 Backend:
 - .NET 9 with ASP.NET Core Web API
 - Clean Architecture + Domain-Driven Design (DDD)
@@ -28,6 +31,7 @@ Frontend:
 ```
 
 ## Architecture Decisions
+
 - **Modular monolith** architecture pattern
 - **Multi-tenant SaaS** with row-level security
 - **Plugin architecture** for extending to new standards
@@ -36,7 +40,9 @@ Frontend:
 - **API-first** design for future integrations
 
 ## Current Development Phase
+
 Building MVP (Month 1-8) with focus on:
+
 1. Core compliance engine
 2. Assessment workflow (Stage 1, Stage 2, Surveillance)
 3. Finding management with evidence
@@ -44,6 +50,7 @@ Building MVP (Month 1-8) with focus on:
 5. Basic analytics dashboard
 
 ## Key Business Rules
+
 - Auditors must be qualified for specific standards
 - Assessment duration calculated based on client size/complexity
 - Findings classified as Major/Minor/Observation
@@ -51,7 +58,8 @@ Building MVP (Month 1-8) with focus on:
 - Complete audit trail for accreditation bodies
 
 ## Project Structure
-```
+
+```markdown
 src/
 ├── UCertify.Api/              # REST API endpoints
 ├── UCertify.Application/      # Use cases (CQRS commands/queries)
@@ -61,12 +69,14 @@ src/
 ```
 
 ## Development Approach
+
 - Lean team: 1 senior developer + 1 domain expert
 - AI-augmented development (3-5x productivity)
 - 8-month timeline to MVP
 - Focus on extensibility for future standards
 
 ## Special Considerations
+
 1. **Compliance First**: Every feature must maintain audit trail
 2. **Data Isolation**: Strict tenant separation (competitors use same platform)
 3. **Offline Capability**: Auditors work in facilities without internet
@@ -74,7 +84,8 @@ src/
 5. **Trust**: Security and data integrity are paramount
 
 ## Example Use Case
-```
+
+```markdown
 Auditor conducts ISO 9001 assessment:
 1. Plans audit in system (dates, scope, team)
 2. Reviews client documents online
@@ -87,6 +98,7 @@ Auditor conducts ISO 9001 assessment:
 ```
 
 ## Common Acronyms
+
 - CAB: Conformity Assessment Body
 - NCR: Non-Conformity Report  
 - CAPA: Corrective and Preventive Action

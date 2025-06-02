@@ -14,6 +14,7 @@ This document analyzes the business requirements from the U-Certify platform and
 ## Multi-Tenancy Design Approach
 
 ### Tenant Model
+
 In UCertify, each **Conformity Assessment Body (CAB)** represents a separate tenant with complete data isolation:
 
 - **Tenant**: CAB organization (e.g., "ABC Certification Ltd")
@@ -24,6 +25,7 @@ In UCertify, each **Conformity Assessment Body (CAB)** represents a separate ten
 ### Tenant-Aware Domain Design
 
 **Approach**: **Domain-Aware Multi-Tenancy**
+
 - Tenant context is part of the domain model (not just infrastructure)
 - All aggregate roots include tenant identification
 - Business rules can be tenant-specific
@@ -44,17 +46,20 @@ The U-Certify platform operates within three main bounded contexts, all **tenant
 ## Aggregates and Aggregate Roots
 
 ### 1. Application Aggregate
+
 **Aggregate Root**: `Application`  
 **Tenant Scope**: CAB-specific
 
 The Application aggregate manages the initial certification request lifecycle, from submission through approval/rejection **within a specific CAB**.
 
 **Entities:**
+
 - `Application` *(Aggregate Root)* - Primary certification request
 - `ApplicationReview` - Review process and decisions
 - `ApplicationDocument` - Supporting documentation
 
 **Value Objects:**
+
 - `ApplicationId` - Unique identifier (APP-YYYY-NNNNN format) - **tenant-scoped uniqueness**
 - `ApplicationStatus` - Workflow state (Received, Under Review, Approved, etc.)
 - `CertificationScope` - Description of activities to be certified
@@ -63,6 +68,7 @@ The Application aggregate manages the initial certification request lifecycle, f
 - `TenantId` - CAB identifier for tenant isolation
 
 **Invariants:**
+
 - Application must have unique identifier once created **within CAB tenant**
 - Status transitions must follow defined workflow
 - Mandatory fields must be complete before proceeding
@@ -72,12 +78,14 @@ The Application aggregate manages the initial certification request lifecycle, f
 ---
 
 ### 2. Assessment Aggregate  
+
 **Aggregate Root**: `Assessment`  
 **Tenant Scope**: CAB-specific
 
 The Assessment aggregate encapsulates the entire audit process including planning, execution, and findings **within a specific CAB**.
 
 **Entities:**
+
 - `Assessment` *(Aggregate Root)* - Main audit/assessment process
 - `AuditPlan` - Detailed audit planning and schedule
 - `AuditTeam` - Team composition and roles
@@ -86,6 +94,7 @@ The Assessment aggregate encapsulates the entire audit process including plannin
 - `AuditSession` - Daily audit activities and evidence collection
 
 **Value Objects:**
+
 - `AssessmentId` - Unique assessment identifier - **tenant-scoped**
 - `AssessmentType` - Stage 1, Stage 2, Surveillance, Recertification
 - `AssessmentStatus` - Planned, In Progress, Completed, Report Issued
@@ -96,6 +105,7 @@ The Assessment aggregate encapsulates the entire audit process including plannin
 - `TenantId` - CAB identifier for tenant isolation
 
 **Invariants:**
+
 - Stage 2 cannot start without completed Stage 1
 - Assessment duration must meet ISO 17021 minimums
 - All findings must have supporting objective evidence
@@ -106,17 +116,20 @@ The Assessment aggregate encapsulates the entire audit process including plannin
 ---
 
 ### 3. Client Aggregate
+
 **Aggregate Root**: `Client`  
 **Tenant Scope**: CAB-specific
 
 The Client aggregate manages organization information, sites, and certification history **within a specific CAB**.
 
 **Entities:**
+
 - `Client` *(Aggregate Root)* - Client organization
 - `Site` - Physical locations within certification scope
 - `CertificationHistory` - Previous and current certifications
 
 **Value Objects:**
+
 - `ClientId` - Unique client identifier - **tenant-scoped**
 - `LegalEntityName` - Official organization name
 - `Address` - Physical address details
@@ -126,6 +139,7 @@ The Client aggregate manages organization information, sites, and certification 
 - `TenantId` - CAB identifier for tenant isolation
 
 **Invariants:**
+
 - Client must have at least one site
 - Multi-site clients must designate central office
 - Legal entity name must be unique **within CAB tenant**
@@ -135,17 +149,20 @@ The Client aggregate manages organization information, sites, and certification 
 ---
 
 ### 4. Certificate Aggregate
+
 **Aggregate Root**: `Certificate`  
 **Tenant Scope**: CAB-specific
 
 The Certificate aggregate manages the certification lifecycle and maintenance **within a specific CAB**.
 
 **Entities:**
+
 - `Certificate` *(Aggregate Root)* - Issued certification document
 - `CertificateScope` - Detailed scope of certification
 - `SurveillanceSchedule` - Ongoing surveillance audit planning
 
 **Value Objects:**
+
 - `CertificateId` - Unique certificate identifier - **tenant-scoped**
 - `CertificateNumber` - Public certificate reference - **globally unique but CAB-branded**
 - `CertificationStandard` - ISO 9001, 14001, 45001, etc.
@@ -155,6 +172,7 @@ The Certificate aggregate manages the certification lifecycle and maintenance **
 - `TenantId` - CAB identifier for tenant isolation
 
 **Invariants:**
+
 - Certificate validity period must be exactly 3 years
 - Certificate number must be unique **globally** (includes CAB prefix)
 - Status transitions must follow certification rules
@@ -164,18 +182,21 @@ The Certificate aggregate manages the certification lifecycle and maintenance **
 ---
 
 ### 5. Auditor Aggregate
+
 **Aggregate Root**: `Auditor`  
 **Tenant Scope**: CAB-specific
 
 The Auditor aggregate manages auditor information, competencies, and availability **within a specific CAB**.
 
 **Entities:**
+
 - `Auditor` *(Aggregate Root)* - Individual auditor
 - `Competence` - Standard-specific qualifications
 - `Assignment` - Audit assignments and roles
 - `ProfessionalDevelopment` - CPD tracking
 
 **Value Objects:**
+
 - `AuditorId` - Unique auditor identifier - **tenant-scoped**
 - `AuditorRole` - Lead Auditor, Auditor, Technical Expert
 - `CompetenceMatrix` - Standards and sectors qualified for
@@ -184,6 +205,7 @@ The Auditor aggregate manages auditor information, competencies, and availabilit
 - `TenantId` - CAB identifier for tenant isolation
 
 **Invariants:**
+
 - Lead auditors must have appropriate qualifications
 - Conflict of interest must be checked for all assignments **within CAB**
 - CPD requirements must be maintained
@@ -194,12 +216,14 @@ The Auditor aggregate manages auditor information, competencies, and availabilit
 ---
 
 ### 6. CAB Configuration Aggregate
+
 **Aggregate Root**: `ConformityAssessmentBody`  
 **Tenant Scope**: This IS the tenant definition
 
 The CAB aggregate represents the tenant itself and manages organizational setup, accreditation, and compliance tracking.
 
 **Entities:**
+
 - `ConformityAssessmentBody` *(Aggregate Root)* - **The tenant/CAB organization**
 - `AccreditationScope` - Standards and sectors accredited for
 - `ComplianceRequirement` - ISO 17021 clause tracking
@@ -208,6 +232,7 @@ The CAB aggregate represents the tenant itself and manages organizational setup,
 - `TenantConfiguration` - Tenant-specific settings and policies
 
 **Value Objects:**
+
 - `CABId` - **Primary tenant identifier** - globally unique
 - `AccreditationBody` - ANAB, UKAS, etc.
 - `AccreditationNumber` - Official accreditation reference
@@ -216,6 +241,7 @@ The CAB aggregate represents the tenant itself and manages organizational setup,
 - `TenantSettings` - CAB-specific business rules and configurations
 
 **Invariants:**
+
 - CAB must maintain valid accreditation
 - All ISO 17021 requirements must be tracked
 - Compliance evidence must be current
@@ -227,16 +253,20 @@ The CAB aggregate represents the tenant itself and manages organizational setup,
 ## Tenant-Aware Domain Services
 
 ### CertificationProcessOrchestrator
+
 **Tenant-Scoped Service**
 Coordinates the certification workflow across aggregates **within a CAB**:
+
 - Application → Assessment → Certificate issuance
 - Status synchronization between aggregates
 - Business rule enforcement across boundaries
 - **Ensures all operations stay within tenant boundary**
 
 ### AuditPlanningService  
+
 **Tenant-Scoped Service**
 Handles complex audit planning logic **for a specific CAB**:
+
 - Duration calculation based on organization size
 - Team competence matching to client requirements (within CAB)
 - Multi-site sampling strategies
@@ -244,8 +274,10 @@ Handles complex audit planning logic **for a specific CAB**:
 - **CAB-specific audit policies and procedures**
 
 ### ComplianceMonitoringService
+
 **Tenant-Scoped Service**
 Tracks accreditation compliance **for a specific CAB**:
+
 - ISO 17021 requirement mapping
 - Evidence collection and verification
 - Compliance reporting and alerts
@@ -253,8 +285,10 @@ Tracks accreditation compliance **for a specific CAB**:
 - **CAB-specific compliance requirements and evidence**
 
 ### TenantManagementService
+
 **Platform-Level Service**
 Manages tenant lifecycle and isolation:
+
 - CAB onboarding and setup
 - Tenant data isolation enforcement
 - Cross-tenant data access prevention
@@ -547,23 +581,27 @@ public interface IApplicationRepository
 ## Key Multi-Tenant Design Considerations
 
 ### 1. Data Isolation
+
 - **Logical Separation**: All data queries include tenant filter
 - **Aggregate Boundaries**: Tenant isolation enforced at aggregate root level
 - **Cross-Tenant Prevention**: Domain services prevent cross-tenant data access
 - **Audit Trail**: All operations logged with tenant context
 
 ### 2. Business Rules
+
 - **Tenant-Specific Rules**: Some business rules vary by CAB (policies, procedures)
 - **Global Rules**: ISO 17021 requirements apply to all tenants
 - **Configuration**: Tenant-specific settings for customizable rules
 - **Compliance**: Each CAB maintains separate compliance status
 
 ### 3. Certificate Numbering
+
 - **Global Uniqueness**: Certificate numbers include CAB prefix (e.g., "ABC-2025-001")
 - **Public Registry**: Certificates may be publicly searchable across all CABs
 - **Brand Identity**: Each CAB maintains their own certificate branding
 
 ### 4. Security & Access
+
 - **User Context**: Users belong to specific CAB tenants
 - **Role-Based Access**: Permissions scoped within tenant boundaries
 - **Data Encryption**: Tenant data encrypted with tenant-specific keys
@@ -574,12 +612,14 @@ public interface IApplicationRepository
 ## Future Considerations
 
 ### Phase 2 Extensions
+
 - **Cross-Tenant Analytics**: Anonymous benchmarking across CABs
 - **Shared Resources**: Common libraries or templates across tenants
 - **Tenant Hierarchies**: Support for CAB subsidiaries or partnerships
 - **Multi-Tenant Reporting**: Platform-level insights and analytics
 
 ### Technical Evolution
+
 - **Tenant Sharding**: Physical data separation for large tenants
 - **Regional Compliance**: Tenant data residency requirements
 - **Tenant-Specific Integrations**: CAB-specific external system connections
@@ -591,4 +631,4 @@ public interface IApplicationRepository
 *Last Updated: 2025-01-22*  
 *Review Frequency: As domain understanding evolves*
 
-**Note**: Multi-tenancy is a core architectural concern that affects every aspect of the domain model. This tenant-aware design ensures proper data isolation while maintaining clean domain boundaries and business rule enforcement. 
+**Note**: Multi-tenancy is a core architectural concern that affects every aspect of the domain model. This tenant-aware design ensures proper data isolation while maintaining clean domain boundaries and business rule enforcement.
