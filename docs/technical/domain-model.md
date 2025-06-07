@@ -35,199 +35,124 @@ In UCertify, each **Conformity Assessment Body (CAB)** represents a separate ten
 
 ---
 
-## Domain Boundaries
+## Modular Monolith Architecture
 
-The U-Certify platform is organized into six main modules representing bounded contexts, all **tenant-scoped**:
+The UCertify platform implements a **Service Bus-Enabled Modular Monolith** architecture where each module represents a distinct bounded context with well-defined responsibilities. Modules communicate exclusively through a service bus abstraction (MassTransit with RabbitMQ), enabling seamless evolution to microservices without code changes.
 
-1. **Identity & Tenant Management**: Platform-level tenant lifecycle and user management
-2. **Application Management**: Certification application intake and client management **(per CAB)**
-3. **Assessment & Audit**: Audit execution, findings, and corrective actions **(per CAB)**
-4. **Certificate Management**: Certificate lifecycle and surveillance scheduling **(per CAB)**
-5. **Resource Management**: Auditor competencies, scheduling, and assignments **(per CAB)**
-6. **Compliance & Reporting**: Cross-cutting compliance tracking and analytics **(per CAB)**
+### Module Architecture Overview
 
-For detailed module architecture, see [Modular Architecture](./modular-architecture.md).
+```mermaid
+graph TB
+    subgraph "Modular Monolith Deployment"
+        subgraph "Platform Module"
+            ITM[Identity & Tenant Management<br/>Platform-Level Operations]
+        end
+        
+        subgraph "Business Modules (Tenant-Scoped)"
+            AM[Application Management<br/>Module]
+            AA[Assessment & Audit<br/>Module] 
+            CM[Certificate Management<br/>Module]
+            RM[Resource Management<br/>Module]
+            CR[Compliance & Reporting<br/>Module]
+        end
+        
+        subgraph "Shared Infrastructure"
+            SB[Service Bus Layer<br/>MassTransit/RabbitMQ]
+            ES[Event Store]
+            DB[(Shared Database<br/>Logical Separation)]
+        end
+    end
+    
+    ITM --> SB
+    AM --> SB
+    AA --> SB
+    CM --> SB
+    RM --> SB
+    CR --> SB
+    
+    SB --> ES
+    SB --> DB
+    
+    AM --> DB
+    AA --> DB
+    CM --> DB
+    RM --> DB
+    CR --> DB
+```
 
----
+### Modular Monolith Principles
 
-## Aggregates and Aggregate Roots
+1. **Module Isolation**: Each module has its own domain model, business logic, and data access
+2. **Service Bus Communication**: All inter-module communication flows through the service bus
+3. **Shared Infrastructure**: Common infrastructure components (database, messaging) are shared
+4. **Independent Deployment Ready**: Modules can be extracted as microservices without code changes
+5. **Tenant Isolation**: Business modules are tenant-scoped; platform module manages tenants
 
-### 1. Application Aggregate
+### Bounded Context Definitions
 
-**Aggregate Root**: `Application`  
-**Tenant Scope**: CAB-specific
+1. **Identity & Tenant Management Bounded Context**
+   - **Purpose**: Platform-level tenant lifecycle and user authentication
+   - **Scope**: Cross-tenant platform operations
+   - **Key Concepts**: CAB, User, Role, Tenant Configuration
+   - **Communication**: Publishes tenant lifecycle events, handles platform commands
 
-The Application aggregate manages the initial certification request lifecycle, from submission through approval/rejection **within a specific CAB**.
+2. **Application Management Bounded Context**
+   - **Purpose**: Certification application intake and client organization management
+   - **Scope**: Single CAB operations
+   - **Key Concepts**: Application, Client, ApplicationReview, Document
+   - **Communication**: Publishes application lifecycle events
 
-**Entities:**
+3. **Assessment & Audit Bounded Context**
+   - **Purpose**: Complete audit lifecycle from planning to recommendation
+   - **Scope**: Single CAB operations
+   - **Key Concepts**: Assessment, AuditPlan, Finding, CorrectiveAction, AuditTeam
+   - **Communication**: Subscribes to application events, publishes assessment events
 
-- `Application` *(Aggregate Root)* - Primary certification request
-- `ApplicationReview` - Review process and decisions
-- `ApplicationDocument` - Supporting documentation
+4. **Certificate Management Bounded Context**
+   - **Purpose**: Certificate issuance, lifecycle, and surveillance management
+   - **Scope**: Single CAB operations
+   - **Key Concepts**: Certificate, CertificateScope, SurveillanceSchedule
+   - **Communication**: Subscribes to assessment events, publishes certificate events
 
-**Value Objects:**
+5. **Resource Management Bounded Context**
+   - **Purpose**: Auditor competence, availability, and assignment management
+   - **Scope**: Single CAB operations
+   - **Key Concepts**: Auditor, Competence, Assignment, ConflictOfInterest
+   - **Communication**: Responds to assignment requests, publishes resource events
 
-- `ApplicationId` - Unique identifier (APP-YYYY-NNNNN format) - **tenant-scoped uniqueness**
-- `ApplicationStatus` - Workflow state (Received, Under Review, Approved, etc.)
-- `CertificationScope` - Description of activities to be certified
-- `ContactInformation` - Client contact details
-- `ApplicationSubmissionDetails` - Channel, timestamp, source
-- `TenantId` - CAB identifier for tenant isolation
+6. **Compliance & Reporting Bounded Context**
+   - **Purpose**: Cross-module compliance tracking and analytics
+   - **Scope**: Single CAB operations with cross-module projections
+   - **Key Concepts**: ComplianceRequirement, AuditTrail, PerformanceMetric
+   - **Communication**: Subscribes to all business events, publishes compliance alerts
 
-**Invariants:**
+### Module Communication Principles
 
-- Application must have unique identifier once created **within CAB tenant**
-- Status transitions must follow defined workflow
-- Mandatory fields must be complete before proceeding
-- Scope description must be substantive (>50 characters)
-- **Application belongs to exactly one CAB tenant**
+- **No Direct Dependencies**: Modules communicate exclusively through service bus messages
+- **Async by Default**: All inter-module communication is asynchronous via integration events
+- **Contract-First**: Message contracts define module interfaces
+- **Tenant Isolation**: All messages include tenant context for proper routing
+- **Eventual Consistency**: Modules maintain their own projections of required external data
 
----
-
-### 2. Assessment Aggregate  
-
-**Aggregate Root**: `Assessment`  
-**Tenant Scope**: CAB-specific
-
-The Assessment aggregate encapsulates the entire audit process including planning, execution, and findings **within a specific CAB**.
-
-**Entities:**
-
-- `Assessment` *(Aggregate Root)* - Main audit/assessment process
-- `AuditPlan` - Detailed audit planning and schedule
-- `AuditTeam` - Team composition and roles
-- `Finding` - Individual audit findings and nonconformities
-- `CorrectiveAction` - Client responses to findings
-- `AuditSession` - Daily audit activities and evidence collection
-
-**Value Objects:**
-
-- `AssessmentId` - Unique assessment identifier - **tenant-scoped**
-- `AssessmentType` - Stage 1, Stage 2, Surveillance, Recertification
-- `AssessmentStatus` - Planned, In Progress, Completed, Report Issued
-- `AuditDuration` - Time allocation based on organization size
-- `FindingClassification` - Major NC, Minor NC, Observation, OFI
-- `AuditEvidence` - Objective evidence supporting findings
-- `AssessmentRecommendation` - Recommend/Conditional/Do Not Recommend
-- `TenantId` - CAB identifier for tenant isolation
-
-**Invariants:**
-
-- Stage 2 cannot start without completed Stage 1
-- Assessment duration must meet ISO 17021 minimums
-- All findings must have supporting objective evidence
-- Lead auditor must make clear recommendation
-- **Assessment can only be conducted by auditors from the same CAB tenant**
-- **Assessment can only reference clients from the same CAB tenant**
-
----
-
-### 3. Client Aggregate
-
-**Aggregate Root**: `Client`  
-**Tenant Scope**: CAB-specific
-
-The Client aggregate manages organization information, sites, and certification history **within a specific CAB**.
-
-**Entities:**
-
-- `Client` *(Aggregate Root)* - Client organization
-- `Site` - Physical locations within certification scope
-- `CertificationHistory` - Previous and current certifications
-
-**Value Objects:**
-
-- `ClientId` - Unique client identifier - **tenant-scoped**
-- `LegalEntityName` - Official organization name
-- `Address` - Physical address details
-- `EmployeeCount` - FTE count for audit duration calculation
-- `MultiSiteConfiguration` - Central office designation and site relationships
-- `PreviousCertificationDetails` - Transfer information from other CABs
-- `TenantId` - CAB identifier for tenant isolation
-
-**Invariants:**
-
-- Client must have at least one site
-- Multi-site clients must designate central office
-- Legal entity name must be unique **within CAB tenant**
-- Employee count must be greater than zero
-- **Client belongs to exactly one CAB tenant**
+For detailed module design and interfaces, see [Modular Architecture](./modular-architecture.md).
 
 ---
 
-### 4. Certificate Aggregate
+## Module Domain Models
 
-**Aggregate Root**: `Certificate`  
-**Tenant Scope**: CAB-specific
-
-The Certificate aggregate manages the certification lifecycle and maintenance **within a specific CAB**.
-
-**Entities:**
-
-- `Certificate` *(Aggregate Root)* - Issued certification document
-- `CertificateScope` - Detailed scope of certification
-- `SurveillanceSchedule` - Ongoing surveillance audit planning
-
-**Value Objects:**
-
-- `CertificateId` - Unique certificate identifier - **tenant-scoped**
-- `CertificateNumber` - Public certificate reference - **globally unique but CAB-branded**
-- `CertificationStandard` - ISO 9001, 14001, 45001, etc.
-- `CertificateStatus` - Active, Suspended, Withdrawn, Expired
-- `ValidityPeriod` - Issue date, expiry date, 3-year cycle
-- `CertificationDecision` - Grant, Refuse, Conditional grant
-- `TenantId` - CAB identifier for tenant isolation
-
-**Invariants:**
-
-- Certificate validity period must be exactly 3 years
-- Certificate number must be unique **globally** (includes CAB prefix)
-- Status transitions must follow certification rules
-- Suspension requires documented justification
-- **Certificate can only be issued by the owning CAB tenant**
+Each bounded context (module) contains its own domain model with aggregates, entities, value objects, and domain services. This section details the domain model for each module, emphasizing the tenant-scoped nature of business modules.
 
 ---
 
-### 5. Auditor Aggregate
+### 1. Identity & Tenant Management Module
 
-**Aggregate Root**: `Auditor`  
-**Tenant Scope**: CAB-specific
+**Bounded Context**: Platform-level tenant and user management  
+**Tenant Scope**: Platform-wide (manages tenants themselves)
 
-The Auditor aggregate manages auditor information, competencies, and availability **within a specific CAB**.
-
-**Entities:**
-
-- `Auditor` *(Aggregate Root)* - Individual auditor
-- `Competence` - Standard-specific qualifications
-- `Assignment` - Audit assignments and roles
-- `ProfessionalDevelopment` - CPD tracking
-
-**Value Objects:**
-
-- `AuditorId` - Unique auditor identifier - **tenant-scoped**
-- `AuditorRole` - Lead Auditor, Auditor, Technical Expert
-- `CompetenceMatrix` - Standards and sectors qualified for
-- `Availability` - Schedule and capacity
-- `ConflictOfInterest` - Client relationship restrictions
-- `TenantId` - CAB identifier for tenant isolation
-
-**Invariants:**
-
-- Lead auditors must have appropriate qualifications
-- Conflict of interest must be checked for all assignments **within CAB**
-- CPD requirements must be maintained
-- Competence must be current for assigned standards
-- **Auditor belongs to exactly one CAB tenant**
-- **Auditor can only be assigned to assessments within their CAB**
-
----
-
-### 6. CAB Configuration Aggregate
+#### CAB Configuration Aggregate
 
 **Aggregate Root**: `ConformityAssessmentBody`  
-**Tenant Scope**: This IS the tenant definition
-
-The CAB aggregate represents the tenant itself and manages organizational setup, accreditation, and compliance tracking.
+**Purpose**: Represents the tenant itself and manages organizational setup, accreditation, and compliance policies.
 
 **Entities:**
 
@@ -247,274 +172,690 @@ The CAB aggregate represents the tenant itself and manages organizational setup,
 - `ScopeOfAccreditation` - Authorized certification activities
 - `TenantSettings` - CAB-specific business rules and configurations
 
-**Invariants:**
+**Domain Services:**
 
-- CAB must maintain valid accreditation
-- All ISO 17021 requirements must be tracked
-- Compliance evidence must be current
-- Management reviews must occur at planned intervals
-- **CAB ID serves as the primary tenant identifier for all other aggregates**
+- `TenantProvisioningService` - New CAB setup and onboarding
+- `AccreditationComplianceService` - ISO 17021 compliance tracking
+- `TenantConfigurationService` - Tenant-specific rule management
+
+**Integration Events Published:**
+
+- `CABRegistered` - New tenant created
+- `CABConfigurationUpdated` - Tenant settings changed
+- `CABSuspended` - Tenant access restricted
+- `AccreditationUpdated` - Accreditation scope changed
+
+#### User Management Aggregate
+
+**Aggregate Root**: `User`  
+**Purpose**: Platform user management with tenant association
+
+**Entities:**
+
+- `User` *(Aggregate Root)* - Platform user account
+- `UserRole` - Tenant-specific role assignments
+- `UserSession` - Authentication session tracking
+
+**Value Objects:**
+
+- `UserId` - Global user identifier
+- `TenantMembership` - User-CAB associations
+- `RolePermissions` - Tenant-scoped permissions
+- `AuthenticationCredentials` - Authentication details
+
+**Integration Events Published:**
+
+- `UserCreated` - New user account
+- `UserRoleChanged` - Role assignments updated
+- `UserDeactivated` - User access removed
 
 ---
 
-## Tenant-Aware Domain Services
+### 2. Application Management Module
 
-### CertificationProcessOrchestrator
+**Bounded Context**: Certification application lifecycle  
+**Tenant Scope**: CAB-specific
 
-**Tenant-Scoped Service**
-Coordinates the certification workflow across aggregates **within a CAB**:
+#### Application Aggregate
 
-- Application → Assessment → Certificate issuance
-- Status synchronization between aggregates
-- Business rule enforcement across boundaries
-- **Ensures all operations stay within tenant boundary**
+**Aggregate Root**: `Application`  
+**Purpose**: Manages certification request lifecycle from submission to approval/rejection
 
-### AuditPlanningService  
+**Entities:**
 
-**Tenant-Scoped Service**
-Handles complex audit planning logic **for a specific CAB**:
+- `Application` *(Aggregate Root)* - Primary certification request
+- `ApplicationReview` - Review process and decisions
+- `ApplicationDocument` - Supporting documentation
 
-- Duration calculation based on organization size
-- Team competence matching to client requirements (within CAB)
-- Multi-site sampling strategies
-- Risk-based audit program development
-- **CAB-specific audit policies and procedures**
+**Value Objects:**
 
-### ComplianceMonitoringService
+- `ApplicationId` - Unique identifier (APP-YYYY-NNNNN format) - **tenant-scoped uniqueness**
+- `ApplicationStatus` - Workflow state (Received, Under Review, Approved, etc.)
+- `CertificationScope` - Description of activities to be certified
+- `ContactInformation` - Client contact details
+- `ApplicationSubmissionDetails` - Channel, timestamp, source
+- `TenantId` - CAB identifier for tenant isolation
 
-**Tenant-Scoped Service**
-Tracks accreditation compliance **for a specific CAB**:
+**Domain Services:**
 
-- ISO 17021 requirement mapping
-- Evidence collection and verification
-- Compliance reporting and alerts
-- Audit readiness assessment
-- **CAB-specific compliance requirements and evidence**
+- `ApplicationValidationService` - Business rule validation
+- `DocumentVerificationService` - Document completeness checking
+- `ApplicationWorkflowService` - Status transition management
 
-### TenantManagementService
+**Integration Events Published:**
 
-**Platform-Level Service**
-Manages tenant lifecycle and isolation:
+- `ApplicationReceived` - New application submitted
+- `ApplicationApproved` - Application approved for assessment
+- `ApplicationRejected` - Application rejected with reasons
+- `ClientRegistered` - New client organization created
 
-- CAB onboarding and setup
-- Tenant data isolation enforcement
-- Cross-tenant data access prevention
+**Integration Events Subscribed:**
+
+- `CABConfigurationUpdated` - Update application policies
+
+#### Client Aggregate
+
+**Aggregate Root**: `Client`  
+**Purpose**: Client organization and site management
+
+**Entities:**
+
+- `Client` *(Aggregate Root)* - Client organization
+- `Site` - Physical locations within certification scope
+- `CertificationHistory` - Previous and current certifications
+
+**Value Objects:**
+
+- `ClientId` - Unique client identifier - **tenant-scoped**
+- `LegalEntityName` - Official organization name
+- `Address` - Physical address details
+- `EmployeeCount` - FTE count for audit duration calculation
+- `MultiSiteConfiguration` - Central office designation and site relationships
+- `PreviousCertificationDetails` - Transfer information from other CABs
+
+**Domain Services:**
+
+- `ClientUniquenessService` - Ensure unique client names within tenant
+- `MultiSiteManagementService` - Site relationship management
+- `ClientDataSynchronizationService` - Cross-module data consistency
+
+**Integration Events Published:**
+
+- `ClientRegistered` - New client organization created
+- `ClientUpdated` - Client information changed
+- `SiteAdded` - New client site registered
+
+---
+
+### 3. Assessment & Audit Module
+
+**Bounded Context**: Audit execution and findings management  
+**Tenant Scope**: CAB-specific
+
+#### Assessment Aggregate
+
+**Aggregate Root**: `Assessment`  
+**Purpose**: Complete audit process including planning, execution, and findings
+
+**Entities:**
+
+- `Assessment` *(Aggregate Root)* - Main audit/assessment process
+- `AuditPlan` - Detailed audit planning and schedule
+- `AuditTeam` - Team composition and roles
+- `Finding` - Individual audit findings and nonconformities
+- `CorrectiveAction` - Client responses to findings
+- `AuditSession` - Daily audit activities and evidence collection
+
+**Value Objects:**
+
+- `AssessmentId` - Unique assessment identifier - **tenant-scoped**
+- `AssessmentType` - Stage 1, Stage 2, Surveillance, Recertification
+- `AssessmentStatus` - Planned, In Progress, Completed, Report Issued
+- `AuditDuration` - Time allocation based on organization size
+- `FindingClassification` - Major NC, Minor NC, Observation, OFI
+- `AuditEvidence` - Objective evidence supporting findings
+- `AssessmentRecommendation` - Recommend/Conditional/Do Not Recommend
+
+**Domain Services:**
+
+- `AuditPlanningService` - Duration calculation and team assignment
+- `FindingClassificationService` - Finding severity determination
+- `AssessmentRecommendationService` - Certification recommendation logic
+- `EvidenceValidationService` - Audit evidence verification
+
+**Integration Events Published:**
+
+- `AssessmentPlanned` - Assessment scheduled with team
+- `FindingRecorded` - New nonconformity or observation
+- `AssessmentCompleted` - Audit finished with recommendation
+- `CorrectiveActionRequired` - Client action needed
+
+**Integration Events Subscribed:**
+
+- `ApplicationApproved` - Trigger assessment planning
+- `AuditorAssigned` - Update assessment team
+- `ClientUpdated` - Update assessment client data
+
+---
+
+### 4. Certificate Management Module
+
+**Bounded Context**: Certificate lifecycle and surveillance  
+**Tenant Scope**: CAB-specific
+
+#### Certificate Aggregate
+
+**Aggregate Root**: `Certificate`  
+**Purpose**: Certificate issuance and lifecycle management
+
+**Entities:**
+
+- `Certificate` *(Aggregate Root)* - Issued certification document
+- `CertificateScope` - Detailed scope of certification
+- `SurveillanceSchedule` - Ongoing surveillance audit planning
+
+**Value Objects:**
+
+- `CertificateId` - Unique certificate identifier - **tenant-scoped**
+- `CertificateNumber` - Public certificate reference - **globally unique with CAB prefix**
+- `CertificationStandard` - ISO 9001, 14001, 45001, etc.
+- `CertificateStatus` - Active, Suspended, Withdrawn, Expired
+- `ValidityPeriod` - Issue date, expiry date, 3-year cycle
+- `CertificationDecision` - Grant, Refuse, Conditional grant
+
+**Domain Services:**
+
+- `CertificateIssuanceService` - Certificate creation and numbering
+- `SurveillanceSchedulingService` - Ongoing audit planning
+- `CertificateValidationService` - Status transition validation
+- `PublicRegistryService` - Public certificate verification
+
+**Integration Events Published:**
+
+- `CertificateIssued` - New certificate created
+- `CertificateSuspended` - Certificate suspended
+- `CertificateWithdrawn` - Certificate withdrawn
+- `SurveillanceScheduled` - Surveillance audit planned
+
+**Integration Events Subscribed:**
+
+- `AssessmentCompleted` - Process certification decision
+- `FindingRecorded` - Evaluate certificate impact
+
+---
+
+### 5. Resource Management Module
+
+**Bounded Context**: Auditor competence and resource management  
+**Tenant Scope**: CAB-specific
+
+#### Auditor Aggregate
+
+**Aggregate Root**: `Auditor`  
+**Purpose**: Auditor profile, competence, and availability management
+
+**Entities:**
+
+- `Auditor` *(Aggregate Root)* - Individual auditor
+- `Competence` - Standard-specific qualifications
+- `Assignment` - Audit assignments and roles
+- `ProfessionalDevelopment` - CPD tracking
+
+**Value Objects:**
+
+- `AuditorId` - Unique auditor identifier - **tenant-scoped**
+- `AuditorRole` - Lead Auditor, Auditor, Technical Expert
+- `CompetenceMatrix` - Standards and sectors qualified for
+- `Availability` - Schedule and capacity
+- `ConflictOfInterest` - Client relationship restrictions
+
+**Domain Services:**
+
+- `AuditorAssignmentService` - Competence matching and assignment
+- `ConflictOfInterestService` - Conflict checking and management
+- `CompetenceManagementService` - Qualification tracking
+- `AvailabilityManagementService` - Resource scheduling
+
+**Integration Events Published:**
+
+- `AuditorRegistered` - New auditor added
+- `AuditorAssigned` - Auditor assigned to assessment
+- `ConflictIdentified` - Conflict of interest found
+- `CompetenceUpdated` - Auditor qualifications changed
+
+**Integration Events Subscribed:**
+
+- `AssessmentPlanningRequired` - Find available auditors
+- `AssessmentCompleted` - Update auditor experience
+
+---
+
+### 6. Compliance & Reporting Module
+
+**Bounded Context**: Cross-module compliance and analytics  
+**Tenant Scope**: CAB-specific with cross-module projections
+
+#### Compliance Aggregate
+
+**Aggregate Root**: `ComplianceTracking`  
+**Purpose**: ISO 17021 compliance monitoring and evidence collection
+
+**Entities:**
+
+- `ComplianceTracking` *(Aggregate Root)* - Overall compliance status
+- `ComplianceRequirement` - Specific ISO 17021 clauses
+- `ComplianceEvidence` - Supporting documentation
+- `ComplianceAudit` - Internal compliance audits
+
+**Value Objects:**
+
+- `ComplianceId` - Unique compliance tracking identifier
+- `RequirementStatus` - Compliant, Non-Compliant, Pending
+- `EvidenceType` - Document, Record, Observation
+- `ComplianceScore` - Quantitative compliance assessment
+
+**Domain Services:**
+
+- `ComplianceMonitoringService` - Real-time compliance tracking
+- `AuditTrailService` - Event aggregation and analysis
+- `ReportingService` - Analytics and dashboard generation
+- `PerformanceMetricsService` - KPI calculation and trending
+
+**Integration Events Published:**
+
+- `ComplianceViolationDetected` - Non-compliance identified
+- `ReportGenerated` - Compliance report created
+- `MetricThresholdExceeded` - Performance alert triggered
+
+**Integration Events Subscribed:**
+
+- *All business events from other modules* - For audit trail and analytics
+
+---
+
+## Module Communication Patterns
+
+### Intra-Module Communication
+
+Within each module, components communicate through:
+
+- **Direct Method Calls**: Between entities within the same aggregate
+- **MediatR Commands/Queries**: Between application services and domain
+- **Domain Events**: Published by aggregates, handled within the same module
+- **Domain Services**: Coordinate complex business logic within module boundaries
+
+### Inter-Module Communication
+
+Modules communicate exclusively through the service bus:
+
+- **Integration Events**: Asynchronous event publication via MassTransit
+- **Message Contracts**: Versioned event schemas shared between modules
+- **Tenant Context**: All messages include tenant ID for proper routing
+- **No Direct Dependencies**: Modules cannot directly reference each other
+
+```mermaid
+sequenceDiagram
+    participant App as Application Module
+    participant Bus as Service Bus
+    participant Audit as Assessment Module
+    participant Resource as Resource Module
+    
+    App->>App: Application.Approve()
+    App->>Bus: Publish ApplicationApproved
+    Bus->>Audit: Route Event
+    Audit->>Audit: Create Assessment
+    Audit->>Bus: Publish AssessmentPlanningRequired
+    Bus->>Resource: Route Event
+    Resource->>Resource: Find Available Auditors
+    Resource->>Bus: Publish AuditorsAssigned
+```
+
+### Event Types
+
+1. **Domain Events** (MediatR - Intra-Module)
+   - Published within aggregate boundaries
+   - Synchronous handling within module
+   - Examples: `ApplicationStatusChanged`, `FindingClassified`
+
+2. **Integration Events** (MassTransit - Inter-Module)
+   - Published across module boundaries
+   - Asynchronous handling with eventual consistency
+   - Examples: `ApplicationApproved`, `AssessmentCompleted`
+
+---
+
+## Consistency and Transaction Boundaries
+
+### Strong Consistency (Within Modules)
+
+- **Aggregate Boundaries**: All changes within an aggregate are atomic
+- **Database Transactions**: Module operations complete within single transaction
+- **Business Invariants**: Enforced immediately within module boundaries
+- **ACID Properties**: Full ACID guarantees for intra-module operations
+
+### Eventual Consistency (Across Modules)
+
+- **Integration Events**: State synchronization via asynchronous events
+- **Projection Updates**: Read models updated through event streams
+- **Compensating Actions**: Saga patterns for long-running processes
+- **Retry Mechanisms**: Automatic retry for failed event processing
+
+### Saga Orchestration
+
+Complex business processes that span modules use the Saga pattern:
+
+- **Certification Process Saga**: Orchestrates application → assessment → certificate
+- **Assessment Execution Saga**: Coordinates planning → execution → reporting
+- **Corrective Action Saga**: Manages finding → response → verification
+---
+
+## Modular Monolith Project Structure
+
+The domain project structure reflects the modular architecture with clear module boundaries:
+
+```
+UCertify.Domain/
+├── Common/
+│   ├── Base/
+│   │   ├── Entity.cs
+│   │   ├── AggregateRoot.cs
+│   │   ├── ValueObject.cs
+│   │   ├── DomainEvent.cs
+│   │   └── IntegrationEvent.cs
+│   ├── MultiTenancy/
+│   │   ├── ITenantAware.cs
+│   │   ├── TenantId.cs
+│   │   ├── ITenantContext.cs
+│   │   └── TenantScopedId.cs
+│   ├── ValueObjects/
+│   │   ├── EmailAddress.cs
+│   │   ├── PhoneNumber.cs
+│   │   ├── Address.cs
+│   │   ├── DateRange.cs
+│   │   └── Money.cs
+│   ├── Enums/
+│   │   ├── AuditStage.cs
+│   │   ├── Standard.cs
+│   │   └── Priority.cs
+│   └── Exceptions/
+│       ├── DomainException.cs
+│       ├── BusinessRuleViolationException.cs
+│       └── TenantIsolationViolationException.cs
+│
+├── Modules/
+│   ├── IdentityTenantManagement/
+│   │   ├── Aggregates/
+│   │   │   ├── CABConfiguration/
+│   │   │   │   ├── ConformityAssessmentBody.cs
+│   │   │   │   ├── AccreditationScope.cs
+│   │   │   │   ├── TenantConfiguration.cs
+│   │   │   │   └── ValueObjects/
+│   │   │   │       ├── CABId.cs
+│   │   │   │       ├── AccreditationNumber.cs
+│   │   │   │       └── TenantSettings.cs
+│   │   │   └── UserManagement/
+│   │   │       ├── User.cs
+│   │   │       ├── UserRole.cs
+│   │   │       └── ValueObjects/
+│   │   │           ├── UserId.cs
+│   │   │           └── TenantMembership.cs
+│   │   ├── DomainServices/
+│   │   │   ├── TenantProvisioningService.cs
+│   │   │   └── AccreditationComplianceService.cs
+│   │   ├── Events/
+│   │   │   ├── Domain/
+│   │   │   │   ├── CABCreated.cs
+│   │   │   │   └── UserAssignedToTenant.cs
+│   │   │   └── Integration/
+│   │   │       ├── CABRegistered.cs
+│   │   │       ├── CABSuspended.cs
+│   │   │       └── UserCreated.cs
+│   │   └── Specifications/
+│   │       ├── TenantIsolationCompliance.cs
+│   │       └── AccreditationValidation.cs
+│   │
+│   ├── ApplicationManagement/
+│   │   ├── Aggregates/
+│   │   │   ├── Application/
+│   │   │   │   ├── Application.cs
+│   │   │   │   ├── ApplicationReview.cs
+│   │   │   │   ├── ApplicationDocument.cs
+│   │   │   │   └── ValueObjects/
+│   │   │   │       ├── ApplicationId.cs
+│   │   │   │       ├── ApplicationStatus.cs
+│   │   │   │       ├── CertificationScope.cs
+│   │   │   │       └── ContactInformation.cs
+│   │   │   └── Client/
+│   │   │       ├── Client.cs
+│   │   │       ├── Site.cs
+│   │   │       ├── CertificationHistory.cs
+│   │   │       └── ValueObjects/
+│   │   │           ├── ClientId.cs
+│   │   │           ├── LegalEntityName.cs
+│   │   │           ├── EmployeeCount.cs
+│   │   │           └── MultiSiteConfiguration.cs
+│   │   ├── DomainServices/
+│   │   │   ├── ApplicationValidationService.cs
+│   │   │   ├── DocumentVerificationService.cs
+│   │   │   └── ClientUniquenessService.cs
+│   │   ├── Events/
+│   │   │   ├── Domain/
+│   │   │   │   ├── ApplicationStatusChanged.cs
+│   │   │   │   └── ClientInformationUpdated.cs
+│   │   │   └── Integration/
+│   │   │       ├── ApplicationReceived.cs
+│   │   │       ├── ApplicationApproved.cs
+│   │   │       ├── ApplicationRejected.cs
+│   │   │       └── ClientRegistered.cs
+│   │   └── Specifications/
+│   │       ├── ApplicationCompleteness.cs
+│   │       ├── DuplicateApplicationCheck.cs
+│   │       └── ClientUniqueness.cs
+│   │
+│   ├── AssessmentAudit/
+│   │   ├── Aggregates/
+│   │   │   └── Assessment/
+│   │   │       ├── Assessment.cs
+│   │   │       ├── AuditPlan.cs
+│   │   │       ├── AuditTeam.cs
+│   │   │       ├── Finding.cs
+│   │   │       ├── CorrectiveAction.cs
+│   │   │       ├── AuditSession.cs
+│   │   │       └── ValueObjects/
+│   │   │           ├── AssessmentId.cs
+│   │   │           ├── AssessmentType.cs
+│   │   │           ├── AssessmentStatus.cs
+│   │   │           ├── AuditDuration.cs
+│   │   │           ├── FindingClassification.cs
+│   │   │           ├── AuditEvidence.cs
+│   │   │           └── AssessmentRecommendation.cs
+│   │   ├── DomainServices/
+│   │   │   ├── AuditPlanningService.cs
+│   │   │   ├── FindingClassificationService.cs
+│   │   │   ├── AssessmentRecommendationService.cs
+│   │   │   └── EvidenceValidationService.cs
+│   │   ├── Events/
+│   │   │   ├── Domain/
+│   │   │   │   ├── FindingClassified.cs
+│   │   │   │   └── EvidenceCollected.cs
+│   │   │   └── Integration/
+│   │   │       ├── AssessmentPlanned.cs
+│   │   │       ├── FindingRecorded.cs
+│   │   │       ├── AssessmentCompleted.cs
+│   │   │       └── CorrectiveActionRequired.cs
+│   │   └── Specifications/
+│   │       ├── Stage2Prerequisites.cs
+│   │       ├── AuditDurationCompliance.cs
+│   │       └── FindingClassificationRules.cs
+│   │
+│   ├── CertificateManagement/
+│   │   ├── Aggregates/
+│   │   │   └── Certificate/
+│   │   │       ├── Certificate.cs
+│   │   │       ├── CertificateScope.cs
+│   │   │       ├── SurveillanceSchedule.cs
+│   │   │       └── ValueObjects/
+│   │   │           ├── CertificateId.cs
+│   │   │           ├── CertificateNumber.cs
+│   │   │           ├── CertificationStandard.cs
+│   │   │           ├── CertificateStatus.cs
+│   │   │           ├── ValidityPeriod.cs
+│   │   │           └── CertificationDecision.cs
+│   │   ├── DomainServices/
+│   │   │   ├── CertificateIssuanceService.cs
+│   │   │   ├── SurveillanceSchedulingService.cs
+│   │   │   ├── CertificateValidationService.cs
+│   │   │   └── PublicRegistryService.cs
+│   │   ├── Events/
+│   │   │   ├── Domain/
+│   │   │   │   ├── CertificateStatusChanged.cs
+│   │   │   │   └── SurveillancePlanned.cs
+│   │   │   └── Integration/
+│   │   │       ├── CertificateIssued.cs
+│   │   │       ├── CertificateSuspended.cs
+│   │   │       ├── CertificateWithdrawn.cs
+│   │   │       └── SurveillanceScheduled.cs
+│   │   └── Specifications/
+│   │       ├── CertificateValidityRules.cs
+│   │       └── SurveillanceRequirements.cs
+│   │
+│   ├── ResourceManagement/
+│   │   ├── Aggregates/
+│   │   │   └── Auditor/
+│   │   │       ├── Auditor.cs
+│   │   │       ├── Competence.cs
+│   │   │       ├── Assignment.cs
+│   │   │       ├── ProfessionalDevelopment.cs
+│   │   │       └── ValueObjects/
+│   │   │           ├── AuditorId.cs
+│   │   │           ├── AuditorRole.cs
+│   │   │           ├── CompetenceMatrix.cs
+│   │   │           ├── Availability.cs
+│   │   │           └── ConflictOfInterest.cs
+│   │   ├── DomainServices/
+│   │   │   ├── AuditorAssignmentService.cs
+│   │   │   ├── ConflictOfInterestService.cs
+│   │   │   ├── CompetenceManagementService.cs
+│   │   │   └── AvailabilityManagementService.cs
+│   │   ├── Events/
+│   │   │   ├── Domain/
+│   │   │   │   ├── CompetenceValidated.cs
+│   │   │   │   └── AvailabilityUpdated.cs
+│   │   │   └── Integration/
+│   │   │       ├── AuditorRegistered.cs
+│   │   │       ├── AuditorAssigned.cs
+│   │   │       ├── ConflictIdentified.cs
+│   │   │       └── CompetenceUpdated.cs
+│   │   └── Specifications/
+│   │       ├── AuditorQualifications.cs
+│   │       ├── ConflictOfInterestRules.cs
+│   │       └── CompetenceRequirements.cs
+│   │
+│   └── ComplianceReporting/
+│       ├── Aggregates/
+│       │   └── ComplianceTracking/
+│       │       ├── ComplianceTracking.cs
+│       │       ├── ComplianceRequirement.cs
+│       │       ├── ComplianceEvidence.cs
+│       │       ├── ComplianceAudit.cs
+│       │       └── ValueObjects/
+│       │           ├── ComplianceId.cs
+│       │           ├── RequirementStatus.cs
+│       │           ├── EvidenceType.cs
+│       │           └── ComplianceScore.cs
+│       ├── DomainServices/
+│       │   ├── ComplianceMonitoringService.cs
+│       │   ├── AuditTrailService.cs
+│       │   ├── ReportingService.cs
+│       │   └── PerformanceMetricsService.cs
+│       ├── Events/
+│       │   ├── Domain/
+│       │   │   ├── ComplianceEvaluated.cs
+│       │   │   └── MetricCalculated.cs
+│       │   └── Integration/
+│       │       ├── ComplianceViolationDetected.cs
+│       │       ├── ReportGenerated.cs
+│       │       └── MetricThresholdExceeded.cs
+│       └── Specifications/
+│           ├── ISO17021Requirements.cs
+│           └── ComplianceThresholds.cs
+│
+├── Contracts/
+│   ├── Commands/
+│   │   ├── ApplicationManagement/
+│   │   │   ├── SubmitApplicationCommand.cs
+│   │   │   └── ApproveApplicationCommand.cs
+│   │   ├── AssessmentAudit/
+│   │   │   ├── PlanAssessmentCommand.cs
+│   │   │   └── RecordFindingCommand.cs
+│   │   └── (other modules...)
+│   ├── Queries/
+│   │   ├── ApplicationManagement/
+│   │   │   ├── GetApplicationDetailsQuery.cs
+│   │   │   └── GetClientApplicationsQuery.cs
+│   │   └── (other modules...)
+│   └── Events/
+│       ├── ApplicationManagement/
+│       │   ├── ApplicationApproved.cs
+│       │   └── ApplicationRejected.cs
+│       ├── AssessmentAudit/
+│       │   ├── AssessmentCompleted.cs
+│       │   └── FindingRecorded.cs
+│       └── (other modules...)
+│
+└── Repositories/
+    ├── IApplicationRepository.cs
+    ├── IAssessmentRepository.cs
+    ├── ICertificateRepository.cs
+    ├── IAuditorRepository.cs
+    ├── IComplianceRepository.cs
+    └── ITenantRepository.cs
+```
 - Tenant-specific configuration management
 
 ---
 
-## Multi-Tenant Project Structure
+## Multi-Tenant Implementation Within Modules
 
+The multi-tenant capabilities of UCertify are implemented within the modular monolith architecture described in the **"Modular Monolith Project Structure"** section above. Each module maintains tenant isolation while supporting the multi-tenant SaaS model:
+
+### Tenant Isolation Approach
+
+- **Domain-Aware Multi-Tenancy**: Tenant context (CAB ID) is part of the domain model, not just infrastructure
+- **Module-Level Isolation**: Each business module enforces tenant isolation for its aggregates
+- **Shared Infrastructure**: Multi-tenancy infrastructure is shared across all modules via the Common layer
+- **Cross-Module Communication**: Integration events include tenant context for proper scoping
+
+### Key Multi-Tenant Components by Module
+
+**Identity & Tenant Management Module (Platform)**:
+- `ConformityAssessmentBody` aggregate (primary tenant entity)
+- `TenantManagementService` for tenant lifecycle
+- Platform-wide tenant configuration and settings
+
+**Business Modules (Tenant-Scoped)**:
+- All aggregates implement `ITenantAware` interface
+- Repositories automatically filter by tenant context
+- Domain events include `TenantId` for proper routing
+- Business rules can be tenant-specific (CAB accreditation scope)
+
+### Tenant Context Flow
+
+```csharp
+// Tenant-aware base interface implemented by all business aggregates
+public interface ITenantAware
+{
+    CABId TenantId { get; }
+}
+
+// Integration events include tenant context for cross-module communication
+public abstract class TenantAwareIntegrationEvent : IntegrationEvent
+{
+    public CABId TenantId { get; protected set; }
+}
 ```
-UCertify.Domain/
-├── MultiTenancy/
-│   ├── ITenantContext.cs
-│   ├── TenantId.cs
-│   ├── ITenantAware.cs
-│   ├── TenantScope.cs
-│   └── TenantIsolationException.cs
-│
-├── Aggregates/
-│   ├── Applications/
-│   │   ├── Application.cs                    // implements ITenantAware
-│   │   ├── ApplicationReview.cs
-│   │   ├── ApplicationDocument.cs
-│   │   ├── ValueObjects/
-│   │   │   ├── ApplicationId.cs             // tenant-scoped ID
-│   │   │   ├── ApplicationStatus.cs
-│   │   │   ├── CertificationScope.cs
-│   │   │   ├── ContactInformation.cs
-│   │   │   └── ApplicationSubmissionDetails.cs
-│   │   ├── Events/
-│   │   │   ├── ApplicationReceived.cs       // includes TenantId
-│   │   │   ├── ApplicationApproved.cs
-│   │   │   └── ApplicationRejected.cs
-│   │   └── Specifications/
-│   │       ├── ApplicationCompleteness.cs
-│   │       ├── DuplicateApplicationCheck.cs  // tenant-scoped check
-│   │       └── TenantApplicationAccess.cs
-│   │
-│   ├── Assessments/
-│   │   ├── Assessment.cs                    // implements ITenantAware
-│   │   ├── AuditPlan.cs
-│   │   ├── AuditTeam.cs
-│   │   ├── Finding.cs
-│   │   ├── CorrectiveAction.cs
-│   │   ├── AuditSession.cs
-│   │   ├── ValueObjects/
-│   │   │   ├── AssessmentId.cs             // tenant-scoped ID
-│   │   │   ├── AssessmentType.cs
-│   │   │   ├── AssessmentStatus.cs
-│   │   │   ├── AuditDuration.cs
-│   │   │   ├── FindingClassification.cs
-│   │   │   ├── AuditEvidence.cs
-│   │   │   └── AssessmentRecommendation.cs
-│   │   ├── Events/
-│   │   │   ├── AssessmentScheduled.cs      // includes TenantId
-│   │   │   ├── FindingRaised.cs
-│   │   │   ├── AssessmentCompleted.cs
-│   │   │   └── RecommendationMade.cs
-│   │   └── Specifications/
-│   │       ├── Stage2Prerequisites.cs
-│   │       ├── AuditDurationCompliance.cs
-│   │       ├── FindingClassificationRules.cs
-│   │       └── TenantAssessmentAccess.cs
-│   │
-│   ├── Clients/
-│   │   ├── Client.cs                       // implements ITenantAware
-│   │   ├── Site.cs
-│   │   ├── CertificationHistory.cs
-│   │   ├── ValueObjects/
-│   │   │   ├── ClientId.cs                 // tenant-scoped ID
-│   │   │   ├── LegalEntityName.cs
-│   │   │   ├── Address.cs
-│   │   │   ├── EmployeeCount.cs
-│   │   │   ├── MultiSiteConfiguration.cs
-│   │   │   └── PreviousCertificationDetails.cs
-│   │   ├── Events/
-│   │   │   ├── ClientRegistered.cs         // includes TenantId
-│   │   │   ├── SiteAdded.cs
-│   │   │   └── ClientInformationUpdated.cs
-│   │   └── Specifications/
-│   │       ├── ClientUniqueness.cs         // tenant-scoped uniqueness
-│   │       ├── MultiSiteRequirements.cs
-│   │       └── TenantClientAccess.cs
-│   │
-│   ├── Certificates/
-│   │   ├── Certificate.cs                  // implements ITenantAware
-│   │   ├── CertificateScope.cs
-│   │   ├── SurveillanceSchedule.cs
-│   │   ├── ValueObjects/
-│   │   │   ├── CertificateId.cs           // tenant-scoped ID
-│   │   │   ├── CertificateNumber.cs       // globally unique with CAB prefix
-│   │   │   ├── CertificationStandard.cs
-│   │   │   ├── CertificateStatus.cs
-│   │   │   ├── ValidityPeriod.cs
-│   │   │   └── CertificationDecision.cs
-│   │   ├── Events/
-│   │   │   ├── CertificateIssued.cs       // includes TenantId
-│   │   │   ├── CertificateSuspended.cs
-│   │   │   ├── CertificateWithdrawn.cs
-│   │   │   └── SurveillanceScheduled.cs
-│   │   └── Specifications/
-│   │       ├── CertificateValidityRules.cs
-│   │       ├── SurveillanceRequirements.cs
-│   │       └── TenantCertificateAccess.cs
-│   │
-│   ├── Auditors/
-│   │   ├── Auditor.cs                     // implements ITenantAware
-│   │   ├── Competence.cs
-│   │   ├── Assignment.cs
-│   │   ├── ProfessionalDevelopment.cs
-│   │   ├── ValueObjects/
-│   │   │   ├── AuditorId.cs               // tenant-scoped ID
-│   │   │   ├── AuditorRole.cs
-│   │   │   ├── CompetenceMatrix.cs
-│   │   │   ├── Availability.cs
-│   │   │   └── ConflictOfInterest.cs
-│   │   ├── Events/
-│   │   │   ├── AuditorRegistered.cs       // includes TenantId
-│   │   │   ├── CompetenceAdded.cs
-│   │   │   ├── AuditorAssigned.cs
-│   │   │   └── ConflictIdentified.cs
-│   │   └── Specifications/
-│   │       ├── AuditorQualifications.cs
-│   │       ├── ConflictOfInterestRules.cs // tenant-scoped conflicts
-│   │       ├── CompetenceRequirements.cs
-│   │       └── TenantAuditorAccess.cs
-│   │
-│   └── CABConfiguration/
-│       ├── ConformityAssessmentBody.cs    // The Tenant Entity
-│       ├── AccreditationScope.cs
-│       ├── ComplianceRequirement.cs
-│       ├── InternalAudit.cs
-│       ├── ManagementReview.cs
-│       ├── TenantConfiguration.cs
-│       ├── ValueObjects/
-│       │   ├── CABId.cs                   // Primary Tenant ID
-│       │   ├── AccreditationBody.cs
-│       │   ├── AccreditationNumber.cs
-│       │   ├── ComplianceStatus.cs
-│       │   ├── ScopeOfAccreditation.cs
-│       │   └── TenantSettings.cs
-│       ├── Events/
-│       │   ├── CABRegistered.cs           // Tenant creation
-│       │   ├── AccreditationUpdated.cs
-│       │   ├── ComplianceRequirementAdded.cs
-│       │   ├── ManagementReviewCompleted.cs
-│       │   └── TenantConfigurationChanged.cs
-│       └── Specifications/
-│           ├── AccreditationCompliance.cs
-│           ├── ISO17021Requirements.cs
-│           └── TenantIsolationCompliance.cs
-│
-├── DomainServices/
-│   ├── TenantManagementService.cs         // Platform-level
-│   ├── CertificationProcessOrchestrator.cs // Tenant-scoped
-│   ├── AuditPlanningService.cs            // Tenant-scoped
-│   ├── ComplianceMonitoringService.cs     // Tenant-scoped
-│   ├── RiskAssessmentService.cs           // Tenant-scoped
-│   └── NotificationService.cs             // Tenant-scoped
-│
-├── Common/
-│   ├── ValueObjects/
-│   │   ├── EntityId.cs                    // Base for tenant-scoped IDs
-│   │   ├── TenantScopedId.cs             // Base class for tenant-aware IDs
-│   │   ├── AuditInfo.cs
-│   │   ├── DateRange.cs
-│   │   ├── EmailAddress.cs
-│   │   ├── PhoneNumber.cs
-│   │   └── Money.cs
-│   ├── Enums/
-│   │   ├── AuditStage.cs
-│   │   ├── WorkflowStatus.cs
-│   │   ├── Standard.cs
-│   │   ├── Priority.cs
-│   │   └── UserRole.cs
-│   ├── Exceptions/
-│   │   ├── DomainException.cs
-│   │   ├── BusinessRuleViolationException.cs
-│   │   ├── InvalidStateTransitionException.cs
-│   │   ├── ResourceNotFoundException.cs
-│   │   └── TenantIsolationViolationException.cs
-│   └── Interfaces/
-│       ├── IAggregateRoot.cs
-│       ├── IEntity.cs
-│       ├── IValueObject.cs
-│       ├── IDomainEvent.cs
-│       ├── ISpecification.cs
-│       └── ITenantAware.cs               // Marker interface for tenant-scoped entities
-│
-├── Events/
-│   ├── Base/
-│   │   ├── DomainEvent.cs                // includes TenantId
-│   │   ├── TenantAwareDomainEvent.cs
-│   │   └── IDomainEventHandler.cs
-│   └── Integration/
-│       ├── CertificationProcessEvents.cs
-│       ├── ComplianceEvents.cs
-│       └── TenantLifecycleEvents.cs
-│
-├── Repositories/
-│   ├── IApplicationRepository.cs         // Tenant-scoped operations
-│   ├── IAssessmentRepository.cs          // Tenant-scoped operations
-│   ├── IClientRepository.cs              // Tenant-scoped operations
-│   ├── ICertificateRepository.cs         // Tenant-scoped operations
-│   ├── IAuditorRepository.cs             // Tenant-scoped operations
-│   ├── ICABConfigurationRepository.cs    // Tenant management
-│   └── ITenantRepository.cs              // Platform-level tenant operations
-│
-└── Specifications/
-    ├── Base/
-    │   ├── Specification.cs
-    │   ├── CompositeSpecification.cs
-    │   └── TenantAwareSpecification.cs   // Base for tenant-scoped specs
-    └── Common/
-        ├── UniqueIdentifierSpecification.cs  // Tenant-scoped uniqueness
-        ├── DateRangeValidation.cs
-        ├── StatusTransitionRules.cs
-        └── TenantAccessSpecification.cs
-```
+
+> **Note**: For detailed project structure and module organization, refer to the **"Modular Monolith Project Structure"** section above. The multi-tenant implementation is embedded within that modular architecture.
 
 ---
 
