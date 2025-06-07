@@ -8,6 +8,8 @@ This document analyzes the business requirements from the U-Certify platform and
 **Standards Focus**: ISO/IEC 17021-1:2015 - Management System Certification Bodies  
 **Business Context**: Certification lifecycle management from application to certificate maintenance  
 **Architecture**: **Multi-Tenant SaaS Platform** - Each CAB operates as an independent tenant
+**Communication**: **Service Bus-Enabled Modular Monolith** - Inter-module communication via MassTransit/RabbitMQ
+**Consistency Model**: **Eventual Consistency** - Strong consistency within aggregates, eventual consistency across modules
 
 ---
 
@@ -35,11 +37,16 @@ In UCertify, each **Conformity Assessment Body (CAB)** represents a separate ten
 
 ## Domain Boundaries
 
-The U-Certify platform operates within three main bounded contexts, all **tenant-scoped**:
+The U-Certify platform is organized into six main modules representing bounded contexts, all **tenant-scoped**:
 
-1. **Certification Management**: Core business process from application to certificate issuance **(per CAB)**
-2. **Compliance Management**: Accreditation requirements tracking and evidence management **(per CAB)**  
-3. **Resource Management**: Auditor competencies, scheduling, and CAB operations **(per CAB)**
+1. **Identity & Tenant Management**: Platform-level tenant lifecycle and user management
+2. **Application Management**: Certification application intake and client management **(per CAB)**
+3. **Assessment & Audit**: Audit execution, findings, and corrective actions **(per CAB)**
+4. **Certificate Management**: Certificate lifecycle and surveillance scheduling **(per CAB)**
+5. **Resource Management**: Auditor competencies, scheduling, and assignments **(per CAB)**
+6. **Compliance & Reporting**: Cross-cutting compliance tracking and analytics **(per CAB)**
+
+For detailed module architecture, see [Modular Architecture](./modular-architecture.md).
 
 ---
 
@@ -609,6 +616,120 @@ public interface IApplicationRepository
 
 ---
 
+## Event-Driven Communication
+
+### Domain Events and Integration Events
+
+The domain model leverages event-driven architecture to maintain loose coupling between aggregates and modules:
+
+**Domain Events** (MediatR)
+- Published within aggregate boundaries
+- Synchronous, in-process handling
+- Maintain transactional consistency
+- Examples: `ApplicationStatusChanged`, `FindingRecorded`
+
+**Integration Events** (MassTransit)
+- Published across module boundaries
+- Asynchronous, eventual consistency
+- Enable module decoupling
+- Examples: `ApplicationApproved`, `AssessmentCompleted`
+
+### Event Flow Architecture
+
+```
+Aggregate → Domain Event → MediatR → Event Handler
+                                  ↓
+                         Integration Event → MassTransit → RabbitMQ → Other Modules
+```
+
+For detailed messaging patterns, see [Messaging Architecture](./messaging-architecture.md).
+
+---
+
+## Eventual Consistency Patterns
+
+### Consistency Boundaries
+
+The domain model implements different consistency guarantees based on business requirements:
+
+**Strong Consistency (Within Aggregates)**
+- All changes within an aggregate are atomic
+- Business invariants enforced immediately
+- No partial state updates allowed
+- Example: Application status transitions
+
+**Eventual Consistency (Across Aggregates/Modules)**
+- State synchronization via events
+- Temporary inconsistencies acceptable
+- Business processes span multiple transactions
+- Example: Application approval triggering assessment planning
+
+### Saga Pattern Implementation
+
+Long-running business processes are managed through sagas:
+
+**Certification Process Saga**
+- Orchestrates the entire certification workflow
+- Manages state across multiple aggregates
+- Handles compensating actions for failures
+- Ensures eventual consistency of the process
+
+**Key Saga Implementations:**
+1. `CertificationProcessSaga` - Application through certificate issuance
+2. `AssessmentExecutionSaga` - Planning through recommendation
+3. `CorrectiveActionSaga` - Finding through closure verification
+
+### Projection and Read Model Updates
+
+**Projection Strategy**
+- Read models updated asynchronously via events
+- Optimized for query performance
+- Eventually consistent with write models
+- Separate storage from aggregates
+
+**Common Projections:**
+- `CABDashboard` - Aggregated metrics per tenant
+- `AuditorWorkload` - Resource utilization views
+- `ComplianceStatus` - Real-time compliance tracking
+- `ClientCertificationHistory` - Denormalized certificate data
+
+---
+
+## Module Integration Patterns
+
+### Inter-Module Communication
+
+Modules communicate exclusively through published integration events:
+
+**Application Module → Assessment Module**
+- `ApplicationApproved` → Triggers assessment planning
+- `ClientUpdated` → Updates assessment client data
+
+**Assessment Module → Certificate Module**
+- `AssessmentCompleted` → Triggers certification decision
+- `RecommendationMade` → Initiates certificate issuance
+
+**All Modules → Compliance Module**
+- Event stream aggregation for compliance tracking
+- Audit trail maintenance
+- Performance metric calculation
+
+### Command and Query Segregation
+
+**Commands (Write Operations)**
+- Routed through MediatR to appropriate aggregate
+- Enforce business rules and invariants
+- Publish events on state changes
+- Return minimal acknowledgment
+
+**Queries (Read Operations)**
+- Bypass aggregates for performance
+- Use optimized read models/projections
+- Support cross-module data aggregation
+- Eventually consistent results
+
+---
+
 ## Future Considerations
 
 ### Phase 2 Extensions
@@ -627,8 +748,8 @@ public interface IApplicationRepository
 
 ---
 
-*Document Version: 2.0*  
-*Last Updated: 2025-01-22*  
+*Document Version: 3.0*  
+*Last Updated: 2025-01-06*  
 *Review Frequency: As domain understanding evolves*
 
-**Note**: Multi-tenancy is a core architectural concern that affects every aspect of the domain model. This tenant-aware design ensures proper data isolation while maintaining clean domain boundaries and business rule enforcement.
+**Note**: This domain model implements a service bus-enabled modular monolith architecture with multi-tenancy as a core concern. The design ensures proper tenant isolation while leveraging eventual consistency patterns for scalability and maintainability. The event-driven approach enables seamless evolution from monolith to microservices as scaling demands require.
