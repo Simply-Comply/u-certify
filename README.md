@@ -1,3 +1,3 @@
 # UCertify
 
-UCertify is a cloud-based compliance management system for Conformity Assessment Bodies (CABs) - organizations that certify other companies against standards like ISO 9001, ISO 14001, etc. Think of it as "Salesforce for certification bodies."
+U-Certify is an AI-powered, cloud-native compliance management system specifically designed for Conformity Assessment Bodies, starting with ISO/IEC 17021-1. It uniquely combines comprehensive standards adherence with intelligent automation to simplify complex processes like impartiality risk management and auditor competency tracking, enabling CABs of all sizes to operate more efficiently, consistently, and with greater confidence in their accreditation.

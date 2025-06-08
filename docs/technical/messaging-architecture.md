@@ -454,9 +454,3 @@ graph LR
 *Document Version: 1.0*  
 *Last Updated: 2025-01-06*  
 *Review Frequency: Quarterly*
-
-**Related Documents**:
-- [Architecture Vision](./architecture-vision.md)
-- [Modular Architecture](./modular-architecture.md)
-- [Domain Model](./domain-model.md)
-- [API Design Guidelines](./api-design-guidelines.md)

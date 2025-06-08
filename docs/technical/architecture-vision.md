@@ -2,13 +2,13 @@
 
 ## Executive Summary
 
-UCertify is designed as a cloud-native, multi-tenant SaaS platform for Conformity Assessment Bodies (CABs). The architecture employs a **Service Bus-Enabled Modular Monolith** pattern that combines the development velocity of a monolithic architecture with the flexibility to evolve into microservices as scaling demands require. The system leverages Domain-Driven Design (DDD), Clean Architecture principles, and eventual consistency patterns to ensure scalability, maintainability, and tenant isolation.
+UCertify is designed as a cloud-native, multi-tenant SaaS platform for Conformity Assessment Bodies (CABs). The architecture employs a **Modular Monolith** pattern that combines the development velocity of a monolithic architecture with the flexibility to evolve into microservices as scaling demands require. The system leverages Domain-Driven Design (DDD), Clean Architecture principles, and eventual consistency patterns to ensure scalability, maintainability, and tenant isolation.
 
 ## Architecture Overview
 
 ### Core Architectural Patterns
 
-#### Service Bus-Enabled Modular Monolith
+#### Modular Monolith
 The platform is structured as a modular monolith where business capabilities are organized into well-defined modules with clear boundaries. All inter-module communication flows through a service bus abstraction (MassTransit with RabbitMQ), enabling seamless extraction of modules into microservices without code changes.
 
 #### Multi-Tenant Architecture
@@ -24,7 +24,6 @@ The system employs eventual consistency between modules through domain events. M
 3. **Tenant Isolation**: Complete data and process isolation between CABs enforced at domain level
 4. **Event Sourcing Ready**: Architecture supports event sourcing for audit trails and compliance tracking
 5. **API-First**: All functionality exposed through well-defined REST APIs
-6. **Offline-First Mobile**: Support for disconnected scenarios in mobile audit applications
 
 ## Module Architecture
 
