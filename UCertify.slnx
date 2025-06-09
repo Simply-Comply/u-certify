@@ -1,11 +1,7 @@
 <Solution>
   <Folder Name="/src/">
-    <Project Path="src\UCertify.Domain\UCertify.Domain.csproj" />
-    <Project Path="src\UCertify.Application\UCertify.Application.csproj" />
-    <Project Path="src\UCertify.Infrastructure\UCertify.Infrastructure.csproj" />
-    <Project Path="src\UCertify.Api\UCertify.Api.csproj" />
+    <Project Path="src\API\UCertify.API\UCertify.API.csproj" Type="Classic C#" />
+    <Project Path="src\Modules\Applications\UCertify.Modules.Applications.Api\UCertify.Modules.Applications.Api.csproj" Type="Classic C#" />
   </Folder>
-  <Folder Name="/test/">
-    <Project Path="src\UCertify.Tests\UCertify.Tests.csproj" />
-  </Folder>
+  <Folder Name="/test/" />
 </Solution>

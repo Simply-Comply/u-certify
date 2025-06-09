@@ -7,6 +7,7 @@
     <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="9.0.5" />
     <PackageVersion Include="Microsoft.Extensions.Resilience" Version="9.0.5" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.5" />
+    <PackageVersion Include="SonarAnalyzer.CSharp" Version="9.32.0.97167" />
     <PackageVersion Include="coverlet.collector" Version="6.0.2" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
     <PackageVersion Include="xunit" Version="2.9.2" />
