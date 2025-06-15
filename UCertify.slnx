@@ -1,7 +1,10 @@
 <Solution>
   <Folder Name="/src/">
-    <Project Path="src\API\UCertify.API\UCertify.API.csproj" Type="Classic C#" />
-    <Project Path="src\Modules\Applications\UCertify.Modules.Applications.Api\UCertify.Modules.Applications.Api.csproj" Type="Classic C#" />
+    <Project Path="src\API\UCertify.API\UCertify.API.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/Applications/">
+    <Project Path="src/Modules/Applications/UCertify.Modules.Applications.Domain/UCertify.Modules.Applications.Domain.csproj" />
   </Folder>
   <Folder Name="/test/" />
 </Solution>
