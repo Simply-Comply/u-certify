@@ -224,7 +224,7 @@ Each bounded context (module) contains its own domain model with aggregates, ent
 **Entities:**
 
 - `Application` *(Aggregate Root)* - Primary certification request
-- `ApplicationReview` - Review process and decisions
+- `ApplicationReview` - Review process and decisions (part of Application lifecycle)
 - `ApplicationDocument` - Supporting documentation
 
 **Value Objects:**
@@ -234,17 +234,20 @@ Each bounded context (module) contains its own domain model with aggregates, ent
 - `CertificationScope` - Description of activities to be certified
 - `ContactInformation` - Client contact details
 - `ApplicationSubmissionDetails` - Channel, timestamp, source
+- `ReviewDecision` - Approval/rejection decision with rationale
+- `ReviewerComments` - Detailed review feedback
 - `TenantId` - CAB identifier for tenant isolation
 
 **Domain Services:**
 
 - `ApplicationValidationService` - Business rule validation
 - `DocumentVerificationService` - Document completeness checking
-- `ApplicationWorkflowService` - Status transition management
+- `ApplicationWorkflowService` - Status transition management including review process
 
 **Integration Events Published:**
 
 - `ApplicationReceived` - New application submitted
+- `ApplicationReviewed` - Review completed (includes decision)
 - `ApplicationApproved` - Application approved for assessment
 - `ApplicationRejected` - Application rejected with reasons
 - `ClientRegistered` - New client organization created

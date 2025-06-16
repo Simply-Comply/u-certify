@@ -13,14 +13,18 @@ This document defines the **invariants** for the Application aggregate in the U-
 ## Core Aggregate Invariants
 
 ### INV-APP-001: Tenant Isolation
+
 **Invariant**: Every Application MUST belong to exactly one CAB tenant
+
 - **Condition**: `Application.TenantId != null && Application.TenantId.IsValid()`
 - **Enforcement**: Set during creation, immutable thereafter
 - **Violation**: Throws `TenantIsolationViolationException`
 - **Rationale**: Multi-tenant data isolation requirement
 
 ### INV-APP-002: Unique Identifier
+
 **Invariant**: Application MUST have a unique identifier within the CAB tenant
+
 - **Condition**: `ApplicationId` follows format `APP-YYYY-NNNNN` and is unique within tenant scope
 - **Format Validation**: `^APP-\d{4}-\d{5}$`
 - **Enforcement**: System-generated, immutable after creation
@@ -28,7 +32,9 @@ This document defines the **invariants** for the Application aggregate in the U-
 - **Rationale**: Essential for tracking throughout certification lifecycle (BR-AR-003)
 
 ### INV-APP-003: Mandatory Field Completeness
+
 **Invariant**: Application MUST contain all mandatory information before proceeding to review
+
 - **Required Fields**:
   - `LegalEntityName` (not null, not empty, length >= 2)
   - `PrimaryContact.Name` (not null, not empty)
@@ -43,7 +49,9 @@ This document defines the **invariants** for the Application aggregate in the U-
 - **Rationale**: ISO 17021 Clause 9.1.1 requirements (BR-AR-002)
 
 ### INV-APP-004: Status Workflow Integrity
+
 **Invariant**: Application status transitions MUST follow defined workflow
+
 - **Valid Transitions**:
   - `null` → `Received` (creation)
   - `Received` → `Under Review`
@@ -59,7 +67,9 @@ This document defines the **invariants** for the Application aggregate in the U-
 - **Rationale**: Ensures proper workflow control (BR-AR-008)
 
 ### INV-APP-005: Certification Scope Validity
+
 **Invariant**: Certification scope description MUST be substantive and meaningful
+
 - **Conditions**:
   - `CertificationScope.Description.Length >= 50`
   - `CertificationScope.Description` not generic (no "all activities", "everything")
@@ -70,7 +80,9 @@ This document defines the **invariants** for the Application aggregate in the U-
 - **Rationale**: Clear scope definition critical for audit planning (BR-AR-011)
 
 ### INV-APP-006: Employee Count Validity
+
 **Invariant**: Employee numbers MUST be provided and valid for audit duration calculation
+
 - **Conditions**:
   - `EmployeeCount.FullTimeEquivalent > 0`
   - `EmployeeCount.FullTime >= 0`
@@ -82,7 +94,9 @@ This document defines the **invariants** for the Application aggregate in the U-
 - **Rationale**: ISO 17021 Annex B audit duration requirements (BR-AR-012)
 
 ### INV-APP-007: Multi-Site Central Office Designation
+
 **Invariant**: Multi-site applications MUST designate exactly one central office
+
 - **Condition**: If `Sites.Count > 1` then exactly one site MUST have `IsCentralOffice = true`
 - **Additional Rule**: Single-site applications cannot designate central office
 - **Enforcement**: Validation when adding/removing sites
@@ -90,7 +104,9 @@ This document defines the **invariants** for the Application aggregate in the U-
 - **Rationale**: ISO 17021 Annex A central function requirement (BR-AR-006)
 
 ### INV-APP-008: Standard Combination Validity
+
 **Invariant**: Requested certification standards MUST be valid combinations
+
 - **Allowed Combinations**:
   - Single standard: ISO 9001, ISO 14001, or ISO 45001
   - Dual standards: 9001+14001, 9001+45001, 14001+45001
@@ -101,7 +117,9 @@ This document defines the **invariants** for the Application aggregate in the U-
 - **Rationale**: Enables integrated audits while maintaining integrity (BR-AR-007)
 
 ### INV-APP-009: Receipt Timestamp Immutability
+
 **Invariant**: Application receipt timestamp MUST be immutable once set
+
 - **Conditions**:
   - `ReceiptTimestamp` set only once during creation
   - Precision: UTC timestamp with local timezone stored
@@ -111,7 +129,9 @@ This document defines the **invariants** for the Application aggregate in the U-
 - **Rationale**: Establishes official receipt date for SLA tracking (BR-AR-005)
 
 ### INV-APP-010: Confidentiality Classification
+
 **Invariant**: All applications MUST maintain confidentiality classification
+
 - **Condition**: `ConfidentialityLevel = "Confidential - Client Data"`
 - **Immutability**: Classification cannot be changed (always confidential)
 - **Access Control**: Must respect role-based access restrictions
@@ -126,14 +146,18 @@ This document defines the **invariants** for the Application aggregate in the U-
 ### Application Review Invariants
 
 #### INV-REV-001: Review Assignment
+
 **Invariant**: ApplicationReview MUST be assigned to qualified reviewer
+
 - **Condition**: `ReviewerId` references valid CAB staff member with appropriate role
 - **Tenant Scope**: Reviewer must belong to same CAB tenant
 - **Enforcement**: Validation during review assignment
 - **Violation**: Throws `InvalidReviewerAssignmentException`
 
 #### INV-REV-002: Review Completeness
+
 **Invariant**: ApplicationReview MUST be complete before status change to approved/rejected
+
 - **Required Fields**:
   - `TechnicalReview.IsComplete = true`
   - `CommercialReview.IsComplete = true`
@@ -144,7 +168,9 @@ This document defines the **invariants** for the Application aggregate in the U-
 ### Application Document Invariants
 
 #### INV-DOC-001: Document Integrity
+
 **Invariant**: ApplicationDocuments MUST maintain file integrity and validity
+
 - **Conditions**:
   - File size <= 10MB
   - Allowed formats: PDF, DOC, DOCX, XLS, XLSX
@@ -154,7 +180,9 @@ This document defines the **invariants** for the Application aggregate in the U-
 - **Violation**: Throws `InvalidDocumentException`
 
 #### INV-DOC-002: Document Retention
+
 **Invariant**: ApplicationDocuments MUST be retained for minimum period
+
 - **Retention Period**: 9 years (3 certification cycles)
 - **Condition**: Documents cannot be deleted before retention expiry
 - **Enforcement**: Soft delete with retention check
@@ -165,7 +193,9 @@ This document defines the **invariants** for the Application aggregate in the U-
 ## Cross-Aggregate Invariants
 
 ### INV-APP-011: Client Uniqueness Within Tenant
+
 **Invariant**: Legal entity name MUST be unique within CAB tenant scope
+
 - **Condition**: No other application with same `LegalEntityName` in same tenant
 - **Case Sensitivity**: Case-insensitive comparison
 - **Normalization**: Trim whitespace, standardize punctuation
@@ -174,7 +204,9 @@ This document defines the **invariants** for the Application aggregate in the U-
 - **Rationale**: Prevents processing conflicts (BR-AR-004)
 
 ### INV-APP-012: Transfer Certificate Validation
+
 **Invariant**: Certificate transfer information MUST be valid if provided
+
 - **Conditions**:
   - If `PreviousCertification.IsTransfer = true`:
     - `PreviousCAB` must be valid organization
@@ -192,7 +224,9 @@ This document defines the **invariants** for the Application aggregate in the U-
 ### Application ID Invariants
 
 #### INV-APPID-001: Format Compliance
+
 **Invariant**: ApplicationId MUST follow exact format specification
+
 - **Format**: `APP-YYYY-NNNNN` where YYYY is year, NNNNN is zero-padded sequence
 - **Regex**: `^APP-\d{4}-\d{5}$`
 - **Year**: Must match application creation year
@@ -203,7 +237,9 @@ This document defines the **invariants** for the Application aggregate in the U-
 ### Certification Scope Invariants
 
 #### INV-SCOPE-001: Scope Description Quality
+
 **Invariant**: CertificationScope MUST contain meaningful business description
+
 - **Minimum Length**: 50 characters
 - **Maximum Length**: 2000 characters
 - **Prohibited Phrases**: "all activities", "everything", "general business"
@@ -215,7 +251,9 @@ This document defines the **invariants** for the Application aggregate in the U-
 ### Contact Information Invariants
 
 #### INV-CONTACT-001: Contact Completeness
+
 **Invariant**: ContactInformation MUST be complete and valid
+
 - **Required Fields**:
   - `Name` (2-100 characters)
   - `Email` (valid format, domain verification)
@@ -230,7 +268,9 @@ This document defines the **invariants** for the Application aggregate in the U-
 ## Temporal Invariants
 
 ### INV-APP-013: Application Lifecycle Timing
+
 **Invariant**: Application MUST progress through workflow within defined timeframes
+
 - **SLA Constraints**:
   - Receipt acknowledgment: <= 5 minutes
   - Initial review start: <= 2 business days
@@ -240,7 +280,9 @@ This document defines the **invariants** for the Application aggregate in the U-
 - **Violation**: Triggers `SLAViolationEvent` (not exception)
 
 ### INV-APP-014: Data Freshness
+
 **Invariant**: Application data MUST be updated if stale during review
+
 - **Staleness Threshold**: 180 days from last update
 - **Affected Fields**: Contact information, employee count, scope
 - **Action**: Flag for data refresh before proceeding
@@ -260,7 +302,7 @@ This document defines the **invariants** for the Application aggregate in the U-
 
 ### Exception Hierarchy
 
-```
+```markdown
 DomainException
 ├── BusinessRuleViolationException
 │   ├── TenantIsolationViolationException
@@ -308,4 +350,4 @@ DomainException
 *Last Updated: 2025-01-22*  
 *Review Frequency: With each domain model update*
 
-**Note**: These invariants represent the core business rules that must be maintained at all times within the Application aggregate. Any violation of these invariants indicates a system error or attempted invalid operation that must be prevented. 
+**Note**: These invariants represent the core business rules that must be maintained at all times within the Application aggregate. Any violation of these invariants indicates a system error or attempted invalid operation that must be prevented.
